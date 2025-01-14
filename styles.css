@@ -1,0 +1,241 @@
+body { 
+    font-family: Arial, sans-serif; 
+    margin: 20px; 
+}
+
+#toolbar { margin-bottom: 20px; }
+.btn { margin-right: 10px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { background-color: #f2f2f2; }
+#status { margin-top: 20px; font-weight: bold; }
+.selected { background-color: #d3d3d3; }
+#errorTable { margin-top: 20px; color: red; }
+.condition-dropdown { margin-right: 10px; }
+
+/* Styles pour le tableau d'édition */
+.edit-table {
+    width: 100%;
+    margin-bottom: 15px;
+    border-collapse: collapse;
+}
+
+.edit-table th, .edit-table td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.edit-table th {
+    background-color: #f2f2f2;
+}
+
+.edit-table select, .edit-table input {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Styles pour la fenêtre d'édition */
+.edit-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.edit-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
+}
+
+.condition-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.action-select {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Correction de l'affichage de la règle auto-générée */
+.preview-box {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-top: 15px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.toolbar-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.search-box {
+    flex: 1;
+    max-width: 300px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.action-button {
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.action-button i {
+    font-size: 0.9em;
+}
+
+.btn-add {
+    background-color: #28a745;
+}
+
+.btn-add:hover {
+    background-color: #218838;
+}
+
+.btn-export {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.btn-export:hover {
+    background-color: #e0a800;
+}
+
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.file-input-wrapper input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-input-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.file-input-button:hover {
+    background-color: #5a6268;
+}
+
+/* Améliorations du tableau principal */
+.rules-table {
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rules-table th {
+    background-color: #343a40;
+    color: white;
+    font-weight: 500;
+}
+
+.rules-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Style pour les tooltips */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Ajout des styles pour l'affichage des redondances */
+.redundancy-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ffeeba;
+    border-radius: 4px;
+}
+
+/* Add new styles for post-identification conditions */
+.post-id-section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.post-id-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #495057;
+}
+
+.post-id-conditions {
+    margin-left: 20px;
+}
+
+.condition-type-label {
+    font-weight: bold;
+    color: #666;
+    margin: 10px 0;
+}

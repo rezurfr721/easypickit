@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pickit Editor for EB2</title>
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -10,221 +14,20 @@
     <!-- FileSaver.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #toolbar { margin-bottom: 20px; }
-        .btn { margin-right: 10px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        #status { margin-top: 20px; font-weight: bold; }
-        .selected { background-color: #d3d3d3; }
-        #errorTable { margin-top: 20px; color: red; }
-        .condition-dropdown { margin-right: 10px; }
-        
-        /* Styles pour le tableau d'édition */
-        .edit-table {
-            width: 100%;
-            margin-bottom: 15px;
-            border-collapse: collapse;
-        }
-        
-        .edit-table th, .edit-table td {
-            padding: 8px;
-            text-align: left;
-            border: 1px solid #ddd;
-        }
-        
-        .edit-table th {
-            background-color: #f2f2f2;
-        }
-        
-        .edit-table select, .edit-table input {
-            width: 100%;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+    <!-- Charger le fichier mods_list.js -->
+    <script src="./mods_list.js"></script>
 
-        /* Styles pour la fenêtre d'édition */
-        .edit-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .edit-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-top: 1px solid #eee;
-            margin-top: 20px;
-        }
-
-        .condition-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-select {
-            width: 100%;
-            padding: 8px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .preview-box {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            margin-top: 15px;
-        }
-
-        .toolbar-container {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-
-        .search-box {
-            flex: 1;
-            max-width: 300px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .action-button {
-            padding: 8px 15px;
-            border-radius: 4px;
-            border: none;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .action-button i {
-            font-size: 0.9em;
-        }
-
-        .btn-add {
-            background-color: #28a745;
-        }
-
-        .btn-add:hover {
-            background-color: #218838;
-        }
-
-        .btn-export {
-            background-color: #ffc107;
-            color: #000;
-        }
-
-        .btn-export:hover {
-            background-color: #e0a800;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-
-        .file-input-wrapper input[type=file] {
-            font-size: 100px;
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .file-input-button {
-            background-color: #6c757d;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .file-input-button:hover {
-            background-color: #5a6268;
-        }
-
-        /* Améliorations du tableau principal */
-        .rules-table {
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .rules-table th {
-            background-color: #343a40;
-            color: white;
-            font-weight: 500;
-        }
-
-        .rules-table tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        /* Style pour les tooltips */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip .tooltip-text {
-            visibility: hidden;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            padding: 5px;
-            border-radius: 6px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* Ajout des styles pour l'affichage des redondances */
-        .redundancy-warning {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ffeeba;
-            border-radius: 4px;
-        }
-    </style>
+    <!-- Notre CSS -->
+    <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
     <h1>Pickit Editor for EB2</h1>
     <div class="toolbar-container">
         <button class="action-button btn-add" onclick="addRule()">
             <i class="fas fa-plus"></i> Add Rule
+        </button>
+        <button class="action-button btn-paste" onclick="showPasteDialog()" style="background-color: #6f42c1;">
+            <i class="fas fa-paste"></i> Paste Rule
         </button>
         <button class="action-button btn-export" onclick="exportFile()">
             <i class="fas fa-download"></i> Export
@@ -261,7 +64,102 @@
     </table>
 
     <script>
+        // Global variables
         let rules = [];
+        let hasUnsavedChanges = false;
+        const modsListCache = {};
+        let currentParsedData = null;
+        let parsedData = null;
+
+        // Remplacer la fonction loadModsList() par:
+        function loadModsList() {
+            try {
+                // Charger directement les mods depuis l'objet MODS_LIST
+                Object.entries(MODS_LIST).forEach(([index, name]) => {
+                    modsListCache[parseInt(index)] = name;
+                });
+
+                console.log('Mods list loaded successfully:', Object.keys(modsListCache).length, 'entries');
+            } catch (error) {
+                console.error('Error initializing mods list:', error);
+                
+                // Initialisation avec des valeurs par défaut en cas d'erreur
+                const defaultMods = {
+                    1: "Life",
+                    2: "Mana",
+                    3: "Energy Shield",
+                    4: "Armor",
+                    5: "Evasion"
+                };
+
+                Object.entries(defaultMods).forEach(([index, name]) => {
+                    modsListCache[parseInt(index)] = name;
+                });
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Mods List Initialization',
+                    text: 'Using default mods list. Some features may be limited.',
+                    footer: 'You can continue using the editor with basic functionality.'
+                });
+            }
+        }
+
+        // Error handling
+        window.onerror = function(msg, url, line) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `An error occurred: ${msg}\nLine: ${line}`,
+                footer: 'Please check the console for more details'
+            });
+            return false;
+        };
+
+        // Event delegation for better performance
+        document.addEventListener('click', function(e) {
+            const target = e.target;
+            if (target.matches('.edit-btn')) {
+                editRule(parseInt(target.dataset.index));
+            } else if (target.matches('.delete-btn')) {
+                deleteRule(parseInt(target.dataset.index));
+            }
+        });
+
+        // Optimized functions
+        function loadFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    await parseAndLoadRules(e.target.result);
+                    renderRules();
+                    hasUnsavedChanges = false;
+                } catch (error) {
+                    handleError(error);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function parseAndLoadRules(content) {
+            const lines = content.split(/\r?\n/);
+            rules = lines
+                .filter(line => line.trim() && !line.startsWith("//"))
+                .map((line, index) => {
+                    const parts = line.split("#");
+                    if (parts.length !== 2) {
+                        throw new Error(`Invalid rule format at line ${index + 1}`);
+                    }
+                    return {
+                        line: index + 1,
+                        conditions: parts[0].trim(),
+                        action: parts[1].trim()
+                    };
+                });
+        }
 
         // Ajout de la liste des actions
         const actionsList = [
@@ -278,7 +176,6 @@
         ];
 
         // Variable pour tracker les modifications
-        let hasUnsavedChanges = false;
 
         // Avertissement avant de fermer la page si modifications non sauvegardées
         window.onbeforeunload = function() {
@@ -414,27 +311,49 @@
         // Ajout d'un objet pour stocker les mods
         const modsDatabase = {};
 
-        // Fonction pour charger le fichier ModsList.html
-        async function loadModsList() {
+        // Remplacer la fonction loadModsList() par:
+        function loadModsList() {
             try {
-                const response = await fetch('ModsList.html');
-                const text = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'text/html');
-                const rows = doc.querySelectorAll('tr');
-                
-                rows.forEach((row, index) => {
-                    const cols = row.querySelectorAll('td');
-                    if (cols.length >= 2) {
-                        modsDatabase[index] = {
-                            name: cols[0].textContent.trim(),
-                            description: cols[1].textContent.trim()
-                        };
-                    }
+                // Charger directement les mods depuis l'objet MODS_LIST
+                Object.entries(MODS_LIST).forEach(([index, name]) => {
+                    modsListCache[parseInt(index)] = name;
                 });
+
+                console.log('Mods list loaded successfully:', Object.keys(modsListCache).length, 'entries');
             } catch (error) {
-                console.error('Error loading ModsList.html:', error);
+                console.error('Error initializing mods list:', error);
+                
+                // Initialisation avec des valeurs par défaut en cas d'erreur
+                const defaultMods = {
+                    1: "Life",
+                    2: "Mana",
+                    3: "Energy Shield",
+                    4: "Armor",
+                    5: "Evasion"
+                };
+
+                Object.entries(defaultMods).forEach(([index, name]) => {
+                    modsListCache[parseInt(index)] = name;
+                });
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Mods List Initialization',
+                    text: 'Using default mods list. Some features may be limited.',
+                    footer: 'You can continue using the editor with basic functionality.'
+                });
             }
+        }
+
+        // Mise à jour de l'appel initial
+        document.addEventListener('DOMContentLoaded', () => {
+            loadModsList();  // Appel direct sans vérification de fichier
+        });
+
+        // Mise à jour de la fonction getModName pour être plus robuste
+        function getModName(index) {
+            if (!index || isNaN(index)) return 'Invalid Mod Index';
+            return modsListCache[index] || `Unknown Mod (${index})`;
         }
 
         function createValueInput(key, index, value = '') {
@@ -460,8 +379,8 @@
                     <select id="condition-value-${index}" onchange="updatePreview()">
                         <option value="">Select Category</option>
                         ${categoryList.map(cat => 
-                            `<option value="${cat}" ${value === cat ? 'selected' : ''}>${cat}</option>`
-                        ).join('')}
+                            `<option value="${cat}" ${value === cat ? 'selected' : ''}>${cat}</option>
+                        `).join('')}
                     </select>`;
             }
             if (key === 'Rarity') {
@@ -469,8 +388,8 @@
                     <select id="condition-value-${index}" onchange="updatePreview()">
                         <option value="">Select Rarity</option>
                         ${rarityList.map(rarity => 
-                            `<option value="${rarity}" ${value === rarity ? 'selected' : ''}>${rarity}</option>`
-                        ).join('')}
+                            `<option value="${rarity}" ${value === rarity ? 'selected' : ''}>${rarity}</option>
+                        `).join('')}
                     </select>`;
             }
             // Suppression de la condition pour Type, il utilisera maintenant le return par défaut
@@ -494,31 +413,40 @@
 
         function editRule(index, newRule = null) {
             const rule = index >= 0 ? rules[index] : newRule;
-            let conditionsArray = [];
+            let preIdConditions = [];
+            let postIdConditions = [];
             let operatorsArray = [];
             
-            // Extraire l'action sans le "== true"
-            const actionMatch = rule.action ? rule.action.match(/\[(.*?)\]\s*==\s*"true"/) : null;
-            const currentAction = actionMatch ? actionMatch[1] : actionsList[0];
-            
             if (rule.conditions) {
-                const conditionParts = rule.conditions.split(/\s*(?:&&|\|\|)\s*/);
-                const operators = rule.conditions.match(/\s*(&&|\|\|)\s*/g) || [];
-                operatorsArray = operators.map(op => op.trim());
+                // Split conditions if there's a post-identification part
+                const [preId, postId] = rule.conditions.split(/\s*&&\s*(?=\[base_)/);
                 
-                conditionsArray = conditionParts.map(cond => {
-                    const matches = cond.trim().match(/\[(\w+)\]\s*([=!<>]+)\s*"([^"]*)"/) || [];
-                    return {
-                        key: matches[1] || keysList[0],
-                        operator: matches[2] || '==',
-                        value: matches[3] || ''
-                    };
-                });
+                if (preId) {
+                    preIdConditions = preId.split(/\s*(?:&&|\|\|)\s*/).map(cond => {
+                        const matches = cond.trim().match(/\[(\w+)\]\s*([=!<>]+)\s*"([^"]*)"/) || [];
+                        return {
+                            key: matches[1] || keysList[0],
+                            operator: matches[2] || '==',
+                            value: matches[3] || ''
+                        };
+                    });
+                }
+
+                if (postId) {
+                    postIdConditions = postId.split(/\s*&&\s*/).map(cond => {
+                        const matches = cond.trim().match(/\[(\w+)\]\s*([=!<>]+)\s*"([^"]*)"/) || [];
+                        return {
+                            key: matches[1] || '',
+                            operator: matches[2] || '>=',
+                            value: matches[3] || ''
+                        };
+                    });
+                }
             }
 
             // Assurer qu'il y a au moins une ligne pour la saisie
-            if (conditionsArray.length === 0) {
-                conditionsArray = [{
+            if (preIdConditions.length === 0) {
+                preIdConditions = [{
                     key: keysList[0],
                     operator: '==',
                     value: ''
@@ -527,6 +455,7 @@
 
             let conditionsTable = `
                 <div class="edit-container">
+                    <div class="condition-type-label">Pre-Identification Conditions:</div>
                     <table class="edit-table">
                         <thead>
                             <tr>
@@ -537,7 +466,7 @@
                             </tr>
                         </thead>
                         <tbody id="conditions-container">
-                            ${conditionsArray.map((cond, i) => `
+                            ${preIdConditions.map((cond, i) => `
                                 <tr>
                                     <td>
                                         <select id="condition-key-${i}" onchange="onKeyChange(${i}); updatePreview()">
@@ -561,7 +490,7 @@
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
-                                    ${i < conditionsArray.length - 1 ? `
+                                    ${i < preIdConditions.length - 1 ? `
                                     <td>
                                         <select id="condition-join-${i}" onchange="updatePreview()">
                                             <option value="&&" ${operatorsArray[i] === '&&' ? 'selected' : ''}>AND</option>
@@ -580,6 +509,56 @@
                         <button class="btn btn-secondary" onclick="addCondition('||')">
                             <i class="fas fa-plus"></i> Add OR Condition
                         </button>
+                    </div>
+
+                    <div class="post-id-section">
+                        <div class="post-id-header">Post-Identification Conditions:</div>
+                        <div class="post-id-conditions">
+                            <table class="edit-table" id="post-id-conditions-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mod</th>
+                                        <th>Operator</th>
+                                        <th>Value</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="post-id-conditions-container">
+                                    ${postIdConditions.map((cond, i) => `
+                                        <tr>
+                                            <td>
+                                                <input type="text" 
+                                                    id="post-id-key-${i}" 
+                                                    value="${cond.key}"
+                                                    placeholder="base_maximum_life"
+                                                    onchange="updatePreview()">
+                                            </td>
+                                            <td>
+                                                <select id="post-id-op-${i}" onchange="updatePreview()">
+                                                    ${['>=', '<=', '==', '>', '<'].map(op => 
+                                                        `<option value="${op}" ${op === cond.operator ? 'selected' : ''}>${op}</option>`
+                                                    ).join('')}
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" 
+                                                    id="post-id-value-${i}" 
+                                                    value="${cond.value}"
+                                                    onchange="updatePreview()">
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-danger btn-sm" onclick="removePostIdCondition(${i})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            <button class="btn btn-secondary mt-2" onclick="addPostIdCondition()">
+                                <i class="fas fa-plus"></i> Add Post-ID Condition
+                            </button>
+                        </div>
                     </div>
 
                     <div class="action-section">
@@ -617,16 +596,23 @@
                         const value = document.getElementById(`condition-value-${i}`).value;
                         return `[${key}] ${op} "${value}"`;
                     }).join(' && ');
+                    const postIdConditions = Array.from(document.querySelectorAll('#post-id-conditions-container tr')).map((row, i) => {
+                        const key = document.getElementById(`post-id-key-${i}`).value;
+                        const op = document.getElementById(`post-id-op-${i}`).value;
+                        const value = document.getElementById(`post-id-value-${i}`).value;
+                        return `[${key}] ${op} "${value}"`;
+                    }).join(' && ');
                     const action = `[${document.getElementById('edit-action').value}] == "true"`;
                     
                     if (conditions && action) {
+                        const fullConditions = postIdConditions ? `${conditions} && ${postIdConditions}` : conditions;
                         if (index >= 0) {
-                            rules[index].conditions = conditions;
+                            rules[index].conditions = fullConditions;
                             rules[index].action = action;
                         } else {
                             rules.push({
                                 line: rules.length + 1,
-                                conditions: conditions,
+                                conditions: fullConditions,
                                 action: action
                             });
                         }
@@ -711,23 +697,78 @@
 
         function updatePreview() {
             const container = document.getElementById('conditions-container');
-            const rows = container.querySelectorAll('tr');
+            const postIdContainer = document.getElementById('post-id-conditions-container');
             let conditions = '';
             
-            rows.forEach((row, i) => {
+            // Pre-ID conditions
+            const preIdConditions = Array.from(container.querySelectorAll('tr')).map((row, i) => {
                 const key = document.getElementById(`condition-key-${i}`).value;
                 const op = document.getElementById(`condition-op-${i}`).value;
                 const value = document.getElementById(`condition-value-${i}`).value;
                 const joinOp = document.getElementById(`condition-join-${i}`);
                 
-                conditions += `[${key}] ${op} "${value}"`;
-                if (joinOp) {
-                    conditions += ` ${joinOp.value} `;
-                }
-            });
+                return `[${key}] ${op} "${value}"${joinOp ? ` ${joinOp.value} ` : ''}`;
+            }).join('');
+
+            // Post-ID conditions
+            const postIdConditions = Array.from(postIdContainer.querySelectorAll('tr')).map((row, i) => {
+                const key = document.getElementById(`post-id-key-${i}`).value;
+                const op = document.getElementById(`post-id-op-${i}`).value;
+                const value = document.getElementById(`post-id-value-${i}`).value;
+                
+                return `[${key}] ${op} "${value}"`;
+            }).join(' && ');
+
+            conditions = preIdConditions;
+            if (postIdConditions) {
+                conditions += conditions ? ` && ${postIdConditions}` : postIdConditions;
+            }
 
             const action = `[${document.getElementById('edit-action').value}] == "true"`;
             document.getElementById('preview').innerHTML = `<strong>Preview:</strong> ${conditions} # ${action}`;
+        }
+
+        function addPostIdCondition() {
+            const container = document.getElementById('post-id-conditions-container');
+            const index = container.children.length;
+            
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>
+                    <input type="text" 
+                        id="post-id-key-${index}" 
+                        placeholder="base_maximum_life"
+                        onchange="updatePreview()">
+                </td>
+                <td>
+                    <select id="post-id-op-${index}" onchange="updatePreview()">
+                        ${['>=', '<=', '==', '>', '<'].map(op => 
+                            `<option value="${op}">${op}</option>`
+                        ).join('')}
+                    </select>
+                </td>
+                <td>
+                    <input type="text" 
+                        id="post-id-value-${index}" 
+                        onchange="updatePreview()">
+                </td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="removePostIdCondition(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            container.appendChild(newRow);
+            updatePreview();
+        }
+
+        function removePostIdCondition(index) {
+            const container = document.getElementById('post-id-conditions-container');
+            const rows = container.getElementsByTagName('tr');
+            if (rows[index]) {
+                rows[index].remove();
+                updatePreview();
+            }
         }
 
         function deleteRule(index) {
@@ -898,7 +939,428 @@
             }
         }
 
-        // Ajouter un event listener pour charger les mods au démarrage
+        // Add new function to parse debug data
+        function parseDebugData(text) {
+            const debugLines = text.split('\n').filter(line => line.includes('[dump] ->'));
+            let parsedData = {};
+            
+            debugLines.forEach(line => {
+                const value = line.split('[dump] ->')[1].trim();
+                if (value.startsWith('Mod Index:')) {
+                    const modIndex = parseInt(value.split(':')[1].trim());
+                    // Get mod name from mods_list.txt based on index
+                    const modName = getModName(modIndex);
+                    parsedData['Mod'] = `${modIndex} (${modName})`;
+                } else if (value.startsWith('Value:')) {
+                    parsedData['Value'] = value.split(':')[1].trim();
+                } else if (value.startsWith('Category:')) {
+                    parsedData['Category'] = value.split(':')[1].trim();
+                }
+                // Add other data types as needed
+            });
+            
+            return parsedData;
+        }
+
+        // Function to format parsed data as HTML
+        function formatParsedDataAsHtml(parsedData) {
+            return `
+                <div class="parsed-data" style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+                    <h4 style="margin: 0 0 10px 0;">Parsed Data:</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        ${Object.entries(parsedData).map(([key, value]) => `
+                            <tr>
+                                <td style="padding: 5px; border-bottom: 1px solid #ddd; font-weight: bold;">${key}:</td>
+                                <td style="padding: 5px; border-bottom: 1px solid #ddd;">${value}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+            `;
+        }
+
+        // Modify showPasteDialog to include live parsing
+        function showPasteDialog() {
+            Swal.fire({
+                title: 'Paste Rule Text',
+                html: `
+                    <div class="paste-container" style="margin: 20px 0;">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="rule-name" style="display: block; margin-bottom: 5px;">Rule Name:</label>
+                            <input type="text" 
+                                id="rule-name" 
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                                placeholder="Enter a short name for this rule">
+                        </div>
+                        <p class="hint" style="margin-bottom: 10px; font-size: 0.9em; color: #666;">
+                            Paste a rule text with debug data ([dump] -> lines)
+                        </p>
+                        <textarea id="rule-text" 
+                            style="width: 100%; height: 150px; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                            placeholder="Paste your rule text here..."
+                            oninput="updateParsedData(this.value)"></textarea>
+                        <div id="parsed-data-container"></div>
+                    </div>
+                `,
+                // ... rest of the existing showPasteDialog code ...
+            });
+        }
+
+        // Function to update parsed data display
+        function updateParsedData(text) {
+            const container = document.getElementById('parsed-data-container');
+            if (text.includes('[dump]')) {
+                const parsedData = parseDebugData(text);
+                container.innerHTML = formatParsedDataAsHtml(parsedData);
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        
+
+        function getModName(index) {
+            return modsListCache[index] || 'Unknown Mod';
+        }
+
+        // Load mods list on page load
+        document.addEventListener('DOMContentLoaded', loadModsList);
+
+        function showPasteDialog() {
+            Swal.fire({
+                title: 'Paste Item Data',
+                html: `
+                    <div class="paste-container" style="margin: 20px 0;">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="rule-name" style="display: block; margin-bottom: 5px;">Rule Name:</label>
+                            <input type="text" 
+                                id="rule-name" 
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                                placeholder="Enter a short name for this rule">
+                        </div>
+                        <p class="hint" style="margin-bottom: 10px; font-size: 0.9em; color: #666;">
+                            Paste the raw item text containing [dump] -> lines
+                        </p>
+                        <textarea id="rule-text" 
+                            style="width: 100%; height: 150px; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                            placeholder="Paste the raw item text here..."
+                            oninput="updateParsedItemPreview(this.value)"></textarea>
+                        <div id="parsed-preview"></div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Create Rule',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#28a745',
+                width: '800px',
+                preConfirm: handlePasteDialogConfirm
+            }).then(handlePasteDialogResult);
+        }
+
+        function handlePasteDialogConfirm() {
+            const ruleName = document.getElementById('rule-name').value.trim();
+            const rawText = document.getElementById('rule-text').value.trim();
+            
+            if (!ruleName) {
+                Swal.showValidationMessage('Please enter a name for the rule');
+                return false;
+            }
+
+            if (!rawText.includes('[dump]')) {
+                Swal.showValidationMessage('No [dump] data found in the text');
+                return false;
+            }
+
+            const parsedData = parseRawText(rawText);
+            if (!parsedData.type && !parsedData.rarity && parsedData.mods.length === 0) {
+                Swal.showValidationMessage('No valid data could be extracted from the text');
+                return false;
+            }
+
+            return { parsedData, ruleName };
+        }
+
+        function handlePasteDialogResult(result) {
+            if (result.isConfirmed) {
+                const ruleText = buildRuleFromParsedData(result.value.parsedData, result.value.ruleName);
+                rules.push({
+                    line: rules.length + 1,
+                    conditions: ruleText,
+                    action: '[StashItem] == "true"'
+                });
+                refreshTable();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Rule created successfully',
+                    text: 'The item data has been parsed and converted to a rule.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        }
+
+        function buildRuleFromParsedData(parsedData, ruleName) {
+            let conditions = [];
+            let postIdConditions = [];
+            
+            if (parsedData.type) {
+                conditions.push(`[Type] == "${parsedData.type}"`);
+            }
+            if (parsedData.rarity) {
+                conditions.push(`[Rarity] == "${parsedData.rarity}"`);
+            }
+            if (parsedData.itemLevel) {
+                conditions.push(`[ItemLevel] >= "${parsedData.itemLevel}"`);
+            }
+            
+            // Ajouter les conditions pour les mods si nécessaire
+            parsedData.mods.forEach(mod => {
+                postIdConditions.push(`[${mod.name}] >= "${mod.value}"`);
+            });
+            
+            const preIdConditions = conditions.join(' && ');
+            const postIdConditionsStr = postIdConditions.join(' && ');
+            
+            return `// ${ruleName}\n${preIdConditions} # [StashItem] == "true" ${postIdConditionsStr ? '&& ' + postIdConditionsStr : ''}`;
+        }
+
+        function parseRawText(text) {
+            if (!text) return {
+                name: '',
+                type: '',
+                rarity: '',
+                properties: [],
+                requirements: [],
+                sockets: '',
+                mods: [],
+                flavorText: '',
+                itemLevel: '',
+                quality: '',
+                stackSize: '',
+                identified: false
+            };
+
+            // Séparer le texte en lignes et filtrer les lignes vides
+            const lines = text.split('\n').filter(line => line && typeof line === 'string');
+            const parsed = {
+                name: '',
+                type: '',
+                rarity: '',
+                properties: [],
+                requirements: [],
+                sockets: '',
+                mods: [],
+                flavorText: '',
+                itemLevel: '',
+                quality: '',
+                stackSize: '',
+                identified: false
+            };
+
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+                if (!trimmedLine || !trimmedLine.includes('[dump]')) return;
+
+                const dumpParts = trimmedLine.split('[dump] ->');
+                if (dumpParts.length < 2) return;
+
+                const value = dumpParts[1].trim();
+                
+                // Utiliser un switch pour un meilleur contrôle du flux
+                switch (true) {
+                    case value.startsWith('Short name :'):
+                        parsed.name = value.split(':')[1]?.trim() || '';
+                        break;
+                    case value.startsWith('Type :'):
+                        parsed.type = value.split(':')[1]?.trim() || '';
+                        break;
+                    case value.startsWith('Category :'):
+                        parsed.category = value.split(':')[1]?.trim() || '';
+                        break;
+                    case value.startsWith('Item Level :'):
+                        parsed.itemLevel = value.split(':')[1]?.trim() || '';
+                        break;
+                    case value.startsWith('Required Level :'):
+                        const reqLevel = value.split(':')[1]?.trim();
+                        if (reqLevel) parsed.requirements.push(`Required Level: ${reqLevel}`);
+                        break;
+                    case value.startsWith('Rarity :'):
+                        parsed.rarity = value.split(':')[1]?.trim() || '';
+                        break;
+                    case value.startsWith('Quality :'):
+                        parsed.quality = value.split(':')[1]?.trim() || '';
+                        break;
+                    case value.startsWith('Stack :'):
+                        parsed.stackSize = value.split(':')[1]?.trim() || '';
+                        break;
+                    case value.startsWith('Socket number :'):
+                        parsed.sockets = value.split(':')[1]?.trim() || '';
+                        break;
+                    case value.startsWith('Item identified'):
+                        parsed.identified = true;
+                        break;
+                    case value.startsWith('Mod index :'):
+                        try {
+                            const [indexPart, valuePart] = value.split(', Value :');
+                            const modIndex = parseInt(indexPart.split(':')[1]?.trim());
+                            const modValue = parseInt(valuePart?.trim());
+                            
+                            if (!isNaN(modIndex) && !isNaN(modValue) && modsListCache[modIndex]) {
+                                parsed.mods.push({
+                                    index: modIndex,
+                                    name: modsListCache[modIndex],
+                                    value: modValue
+                                });
+                            }
+                        } catch (e) {
+                            console.warn('Failed to parse mod:', value);
+                        }
+                        break;
+                }
+            });
+
+            return parsed;
+        }
+
+        function formatParsedDataPreview(parsedData) {
+            return `
+                <div style="width: 600px; border: 2px solid #555; padding: 20px; background-color: #2b2b2b; margin: 10px auto;">
+                    <!-- Item Name -->
+                    <div style="color: ${getRarityColor(parsedData.rarity)}; font-size: 18px; font-weight: bold; margin-bottom: 15px; text-align: center;">
+                        ${parsedData.name || 'Unknown Item'}
+                    </div>
+                    
+                    <!-- Item Type and Properties -->
+                    <div style="color: #b8b8b8; font-size: 14px; margin-left: 10px;">
+                        <p style="margin: 4px 0;"><strong>${parsedData.type || 'Unknown Type'}</strong></p>
+                        ${parsedData.quality ? `
+                            <p style="margin: 6px 0; display: flex; justify-content: space-between; align-items: center; min-height: 24px;">
+                                <span style="margin-right: 10px;"><strong>Quality:</strong></span>
+                                <span style="color: rgb(136, 136, 255); margin-right: auto;">+${parsedData.quality}%</span>
+                                <span><i class="fas fa-edit" style="cursor: pointer; margin-right: 5px;"></i><i class="fas fa-trash" style="cursor: pointer;" onclick="removeProperty('quality')"></i></span>
+                            </p>` : ''}
+                        ${parsedData.itemLevel ? `
+                            <p style="margin: 4px 0; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="margin-right: 10px;"><strong>Item Level:</strong></span>
+                                <span style="color: #fff; margin-right: auto;">${parsedData.itemLevel}</span>
+                                <span><i class="fas fa-edit" style="cursor: pointer; margin-right: 5px;"></i><i class="fas fa-trash" style="cursor: pointer;" onclick="removeProperty('itemLevel')"></i></span>
+                            </p>` : ''}
+                        ${parsedData.requirements.map((req, index) => `
+                            <p style="margin: 4px 0; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="margin-right: 10px;"><strong>${req}</strong></span>
+                                <span><i class="fas fa-edit" style="cursor: pointer; margin-right: 5px;"></i><i class="fas fa-trash" style="cursor: pointer;" onclick="removeRequirement(${index})"></i></span>
+                            </p>`).join('')}
+                    </div>
+
+                    <!-- Item Properties -->
+                    <div style="color: #66bbff; font-size: 14px; margin-top: 15px; margin-left: 10px;">
+                        ${parsedData.properties.map((prop, index) => `
+                            <p style="margin: 4px 0; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="margin-right: 10px;">${prop}</span>
+                                <span><i class="fas fa-edit" style="cursor: pointer; margin-right: 5px;"></i><i class="fas fa-trash" style="cursor: pointer;" onclick="removeProperty('properties', ${index})"></i></span>
+                            </p>`).join('')}
+                        ${parsedData.sockets ? `
+                            <p style="margin: 4px 0; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="margin-right: 10px;"><strong>Sockets:</strong></span>
+                                <span style="color: #fff; margin-right: auto;">${parsedData.sockets}</span>
+                                <span><i class="fas fa-edit" style="cursor: pointer; margin-right: 5px;"></i><i class="fas fa-trash" style="cursor: pointer;" onclick="removeProperty('sockets')"></i></span>
+                            </p>` : ''}
+                    </div>
+
+                    <!-- Modifiers -->
+                    <div style="color: #d6b370; font-size: 14px; margin-top: 15px; margin-left: 10px;">
+                        ${parsedData.mods.map((mod, index) => `
+                            <p style="margin: 4px 0; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="margin-right: 10px;">${mod.name}:</span>
+                                <span style="color: #fff; margin-right: auto;">${mod.value}</span>
+                                <span><i class="fas fa-edit" style="cursor: pointer; margin-right: 5px;"></i><i class="fas fa-trash" style="cursor: pointer;" onclick="removeMod(${index})"></i></span>
+                            </p>`).join('')}
+                    </div>
+
+                    <!-- Rule Preview -->
+                    <div style="color: #b8b8b8; font-size: 13px; margin-top: 15px; margin-left: 10px;">
+                        <strong>Generated Rule:</strong>
+                        <pre style="background-color: #1e1e1e; padding: 10px; border-radius: 4px; color: #fff; white-space: pre-wrap; word-break: break-word;">${generateRuleFromParsedData(parsedData)}</pre>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateRuleFromParsedData(parsedData) {
+            let conditions = [];
+            
+            if (parsedData.type) {
+                conditions.push(`[Type] == "${parsedData.type}"`);
+            }
+            if (parsedData.rarity) {
+                conditions.push(`[Rarity] == "${parsedData.rarity}"`);
+            }
+            if (parsedData.itemLevel) {
+                conditions.push(`[ItemLevel] >= "${parsedData.itemLevel}"`);
+            }
+            
+            // Ajouter les conditions pour les mods si nécessaire
+            parsedData.mods.forEach(mod => {
+                conditions.push(`[${mod.name}] >= "${mod.value}"`);
+            });
+            
+            return conditions.join(' && ');
+        }
+
+        function removeProperty(property, index = null) {
+            if (!parsedData) return;
+            
+            if (index !== null) {
+                parsedData[property].splice(index, 1);
+            } else {
+                delete parsedData[property];
+            }
+            updateParsedItemPreview(parsedData);
+        }
+
+        function removeRequirement(index) {
+            if (!parsedData) return;
+            parsedData.requirements.splice(index, 1);
+            updateParsedItemPreview(parsedData);
+        }
+
+        function removeMod(index) {
+            if (!parsedData) return;
+            parsedData.mods.splice(index, 1);
+            updateParsedItemPreview(parsedData);
+        }
+
+        // Mise à jour de la fonction getRarityColor pour correspondre aux couleurs PoE
+        function getRarityColor(rarity) {
+            switch (rarity) {
+                case '0':
+                case 'Normal': return '#c8c8c8';
+                case '1':
+                case 'Magic': return '#8888ff';
+                case '2':
+                case 'Rare': return '#ffff77';
+                case '3':
+                case 'Unique': return '#af6025';
+                default: return '#c8c8c8';
+            }
+        }
+
+        function updateParsedItemPreview(input) {
+            const container = document.getElementById('parsed-preview');
+            
+            if (typeof input === 'string' && input.includes('[dump]')) {
+                parsedData = parseRawText(input);
+            } else if (typeof input === 'object') {
+                parsedData = input;
+            } else {
+                parsedData = null;
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = formatParsedDataPreview(parsedData);
+        }
+
         document.addEventListener('DOMContentLoaded', loadModsList);
     </script>
 </body>
