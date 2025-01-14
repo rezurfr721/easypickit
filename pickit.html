@@ -169,10 +169,14 @@
 
         // Ajout des types depuis normal.ipd
         const typesList = [
-            "Gold", "Scroll of Wisdom", "Arcanist's Etcher", "Armourer's Scrap",
-            "Artificer's Orb", "Blacksmith's Whetstone", "Chaos Orb", "Divine Orb",
-            "Exalted Orb", "Gemcutter's Prism", "Glassblower's Bauble",
-            // ... ajouter tous les types du fichier normal.ipd
+            // OneHandedWeapons
+            "Claws", "Daggers", "Wands", "OneHandSwords", "OneHandAxes", "OneHandMaces", "Sceptres", "Spears", "Flails",
+            // TwoHandedWeapons
+            "Bows", "Staves", "TwoHandSwords", "TwoHandAxes", "TwoHandMaces", "Quarterstaves", "Crossbows", "Traps", "FishingRods",
+            // OffHand
+            "Quivers", "Shields", "Foci",
+            // Armour
+            "Gloves", "Boots", "BodyArmours", "Helmets"
         ];
 
         // Variable pour tracker les modifications
@@ -208,6 +212,9 @@
                     <td>
                         <button class="btn btn-primary btn-sm" onclick="editRule(${index})">
                             <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteRule(${index})">
+                            <i class="fas fa-trash"></i> Delete
                         </button>
                     </td>
                 `;
@@ -416,6 +423,7 @@
             let preIdConditions = [];
             let postIdConditions = [];
             let operatorsArray = [];
+            let currentAction = rule ? rule.action.replace(/\[|\]\s*==\s*"true"/g, '') : actionsList[0]; // Définir currentAction
             
             if (rule.conditions) {
                 // Split conditions if there's a post-identification part
@@ -807,6 +815,9 @@
                     <td>
                         <button class="btn btn-primary btn-sm" onclick="editRule(${index})">
                             <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteRule(${index})">
+                            <i class="fas fa-trash"></i> Delete
                         </button>
                     </td>
                 `;
