@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- FileSaver.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #toolbar { margin-bottom: 20px; }
+        .btn { margin-right: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        #status { margin-top: 20px; font-weight: bold; }
+        .selected { background-color: #d3d3d3; }
+        #errorTable { margin-top: 20px; color: red; }
+        .condition-dropdown { margin-right: 10px; }
+        
+        /* Styles pour le tableau d'édition */
+        .edit-table {
+            width: 100%;
+            margin-bottom: 15px;
+            border-collapse: collapse;
+        }
+        
+        .edit-table th, .edit-table td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        .edit-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .edit-table select, .edit-table input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* Styles pour la fenêtre d'édition */
+        .edit-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .edit-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+
+        .condition-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-select {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .preview-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin-top: 15px;
+        }
+
+        .toolbar-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 300px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .action-button {
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-button i {
+            font-size: 0.9em;
+        }
+
+        .btn-add {
+            background-color: #28a745;
+        }
+
+        .btn-add:hover {
+            background-color: #218838;
+        }
+
+        .btn-export {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .btn-export:hover {
+            background-color: #e0a800;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-input-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .file-input-button:hover {
+            background-color: #5a6268;
+        }
+
+        /* Améliorations du tableau principal */
+        .rules-table {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .rules-table th {
+            background-color: #343a40;
+            color: white;
+            font-weight: 500;
+        }
+
+        .rules-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Style pour les tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            padding: 5px;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Ajout des styles pour l'affichage des redondances */
+        .redundancy-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ffeeba;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pickit Editor for EB2</h1>
+    <div class="toolbar-container">
+        <button class="action-button btn-add" onclick="addRule()">
+            <i class="fas fa-plus"></i> Add Rule
+        </button>
+        <button class="action-button btn-export" onclick="exportFile()">
+            <i class="fas fa-download"></i> Export
+        </button>
+        <div class="file-input-wrapper">
+            <button class="file-input-button">
+                <i class="fas fa-upload"></i> Load IPD File
+            </button>
+            <input type="file" id="fileInput" accept=".ipd" onchange="loadFile(event)">
+        </div>
+        <input type="text" 
+               id="search" 
+               placeholder="Search rules..." 
+               class="search-box" 
+               onkeyup="filterRules()">
+        <button class="action-button" style="background-color: #17a2b8;" onclick="checkRedundancies()">
+            <i class="fas fa-search"></i> Check Redundancies
+        </button>
+    </div>
+
+    <!-- Ajout d'une div pour afficher les redondances -->
+    <div id="redundanciesContainer"></div>
+
+    <table id="rulesTable" class="table table-striped rules-table">
+        <thead>
+            <tr>
+                <th>Line</th>
+                <th>Conditions</th>
+                <th>Action</th>
+                <th width="150px">Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        let rules = [];
+
+        // Ajout de la liste des actions
+        const actionsList = [
+            "StashItem", "StashUnid", "Salvage","SellItem"
+            // Ajoutez d'autres actions si nécessaire
+        ];
+
+        // Ajout des types depuis normal.ipd
+        const typesList = [
+            "Gold", "Scroll of Wisdom", "Arcanist's Etcher", "Armourer's Scrap",
+            "Artificer's Orb", "Blacksmith's Whetstone", "Chaos Orb", "Divine Orb",
+            "Exalted Orb", "Gemcutter's Prism", "Glassblower's Bauble",
+            // ... ajouter tous les types du fichier normal.ipd
+        ];
+
+        // Variable pour tracker les modifications
+        let hasUnsavedChanges = false;
+
+        // Avertissement avant de fermer la page si modifications non sauvegardées
+        window.onbeforeunload = function() {
+            if (hasUnsavedChanges) {
+                return "You have unsaved changes. Are you sure you want to leave?";
+            }
+        };
+
+        function addRule() {
+            // On crée une règle vide
+            const emptyRule = { 
+                line: rules.length + 1, 
+                conditions: '', 
+                action: ''
+            };
+            
+            // On utilise editRule avec la nouvelle règle
+            editRule(-1, emptyRule);
+        }
+
+        function renderRules() {
+            const tbody = document.querySelector('#rulesTable tbody');
+            tbody.innerHTML = '';
+            rules.forEach((rule, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rule.line}</td>
+                    <td>${rule.conditions}</td>
+                    <td>${rule.action}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="editRule(${index})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        /**
+         * Chargement du fichier .ipd et affichage des règles dans le tableau
+         * Version : 1.3.0
+         */
+        function loadFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const lines = e.target.result.split(/\r?\n/);
+                    rules = [];
+                    let lineNumber = 1;
+                    lines.forEach(line => {
+                        if (line.trim() && !line.startsWith("//")) {
+                            const parts = line.split("#");
+                            if (parts.length === 2) {
+                                rules.push({
+                                    line: lineNumber,
+                                    conditions: parts[0].trim(),
+                                    action: parts[1].trim()
+                                });
+                            }
+                        }
+                        lineNumber++;
+                    });
+                    renderRules();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'File loaded successfully',
+                        text: `Loaded ${rules.length} rules`
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error loading file',
+                        text: error.message
+                    });
+                }
+            };
+            reader.onerror = function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to read the file'
+                });
+            };
+            reader.readAsText(file);
+        }
+
+        /**
+         * Rafraîchit le tableau avec les règles chargées
+         * Version : 1.3.0
+         */
+        function refreshTable() {
+            const tbody = document.querySelector("#rulesTable tbody");
+            tbody.innerHTML = "";
+            rules.forEach((rule, index) => {
+                const row = tbody.insertRow();
+                row.insertCell().textContent = rule.line;
+                row.insertCell().textContent = rule.conditions;
+                row.insertCell().textContent = rule.action;
+                const actionsCell = row.insertCell();
+                actionsCell.innerHTML = `
+                    <button class="btn btn-primary btn-sm" onclick='editRule(${index})'><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick='deleteRule(${index})'><i class="fas fa-trash"></i></button>
+                `;
+            });
+        }
+        const keysList = [
+            "Index", // Ajout d'une option pour saisir manuellement un index
+            "Category", // Ajout de Category en première position
+            // Existing keys
+            "Type", "ItemLevel", "MapTier", "Armor", "Evasion", "Energy Shield", 
+            "Computed Armor", "Computed Evasion", "Computed Energy Shield", 
+            "Rarity", "Quality", "Sockets", "Linked",
+            // Special mods
+            "TotalResistances", "DPS", "Elemental DPS", "Physical DPS",
+            "TotalSpellElementalDamage", "TotalFireSpellDamage",
+            "TotalColdSpellDamage", "TotalLightningSpellDamage",
+            "Influence"
+        ];
+
+        const categoryList = [
+            "Chest", "Shield", "Helm", "Ring", "Amulet", "Flask", 
+            "Weapon", "1Handed", "2Handed", "Gloves", "Boots", "Belt", "Map"
+        ];
+
+        const rarityList = [
+            "Normal", "Magic", "Rare", "Unique"
+        ];
+
+        // Ajout d'un objet pour stocker les mods
+        const modsDatabase = {};
+
+        // Fonction pour charger le fichier ModsList.html
+        async function loadModsList() {
+            try {
+                const response = await fetch('ModsList.html');
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const rows = doc.querySelectorAll('tr');
+                
+                rows.forEach((row, index) => {
+                    const cols = row.querySelectorAll('td');
+                    if (cols.length >= 2) {
+                        modsDatabase[index] = {
+                            name: cols[0].textContent.trim(),
+                            description: cols[1].textContent.trim()
+                        };
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading ModsList.html:', error);
+            }
+        }
+
+        function createValueInput(key, index, value = '') {
+            // Vérifier si la clé est un nombre
+            if (!isNaN(key)) {
+                const modInfo = modsDatabase[key];
+                const tooltip = modInfo ? 
+                    `<div class="tooltip-text">${modInfo.name}: ${modInfo.description}</div>` : 
+                    '';
+                return `
+                    <div class="tooltip">
+                        <input type="text" 
+                               id="condition-value-${index}" 
+                               value="${value}" 
+                               onchange="updatePreview()">
+                        ${tooltip}
+                    </div>`;
+            }
+
+            // Le reste du code existant pour Category, Rarity, etc.
+            if (key === 'Category') {
+                return `
+                    <select id="condition-value-${index}" onchange="updatePreview()">
+                        <option value="">Select Category</option>
+                        ${categoryList.map(cat => 
+                            `<option value="${cat}" ${value === cat ? 'selected' : ''}>${cat}</option>`
+                        ).join('')}
+                    </select>`;
+            }
+            if (key === 'Rarity') {
+                return `
+                    <select id="condition-value-${index}" onchange="updatePreview()">
+                        <option value="">Select Rarity</option>
+                        ${rarityList.map(rarity => 
+                            `<option value="${rarity}" ${value === rarity ? 'selected' : ''}>${rarity}</option>`
+                        ).join('')}
+                    </select>`;
+            }
+            // Suppression de la condition pour Type, il utilisera maintenant le return par défaut
+            return `<input type="text" id="condition-value-${index}" value="${value}" onchange="updatePreview()">`;
+        }
+
+        function onKeyChange(index) {
+            const keySelect = document.getElementById(`condition-key-${index}`);
+            const key = keySelect.value;
+            const valueCell = document.getElementById(`value-cell-${index}`);
+            const currentValue = document.getElementById(`condition-value-${index}`)?.value || '';
+            
+            // Si la clé est un nombre, vérifier dans la base de données des mods
+            if (!isNaN(key) && modsDatabase[key]) {
+                valueCell.innerHTML = createValueInput(key, index, currentValue);
+            } else {
+                valueCell.innerHTML = createValueInput(key, index, currentValue);
+            }
+            updatePreview();
+        }
+
+        function editRule(index, newRule = null) {
+            const rule = index >= 0 ? rules[index] : newRule;
+            let conditionsArray = [];
+            let operatorsArray = [];
+            
+            // Extraire l'action sans le "== true"
+            const actionMatch = rule.action ? rule.action.match(/\[(.*?)\]\s*==\s*"true"/) : null;
+            const currentAction = actionMatch ? actionMatch[1] : actionsList[0];
+            
+            if (rule.conditions) {
+                const conditionParts = rule.conditions.split(/\s*(?:&&|\|\|)\s*/);
+                const operators = rule.conditions.match(/\s*(&&|\|\|)\s*/g) || [];
+                operatorsArray = operators.map(op => op.trim());
+                
+                conditionsArray = conditionParts.map(cond => {
+                    const matches = cond.trim().match(/\[(\w+)\]\s*([=!<>]+)\s*"([^"]*)"/) || [];
+                    return {
+                        key: matches[1] || keysList[0],
+                        operator: matches[2] || '==',
+                        value: matches[3] || ''
+                    };
+                });
+            }
+
+            // Assurer qu'il y a au moins une ligne pour la saisie
+            if (conditionsArray.length === 0) {
+                conditionsArray = [{
+                    key: keysList[0],
+                    operator: '==',
+                    value: ''
+                }];
+            }
+
+            let conditionsTable = `
+                <div class="edit-container">
+                    <table class="edit-table">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Operator</th>
+                                <th>Value</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="conditions-container">
+                            ${conditionsArray.map((cond, i) => `
+                                <tr>
+                                    <td>
+                                        <select id="condition-key-${i}" onchange="onKeyChange(${i}); updatePreview()">
+                                            ${keysList.map(k => `
+                                                <option value="${k}" ${k === cond.key ? 'selected' : ''}>${k}</option>
+                                            `).join('')}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select id="condition-op-${i}" onchange="updatePreview()">
+                                            ${['==', '!=', '<=', '>=', '<', '>'].map(op => `
+                                                <option value="${op}" ${op === cond.operator ? 'selected' : ''}>${op}</option>
+                                            `).join('')}
+                                        </select>
+                                    </td>
+                                    <td id="value-cell-${i}">
+                                        ${createValueInput(cond.key, i, cond.value)}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm" onclick="removeCondition(${i})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                    ${i < conditionsArray.length - 1 ? `
+                                    <td>
+                                        <select id="condition-join-${i}" onchange="updatePreview()">
+                                            <option value="&&" ${operatorsArray[i] === '&&' ? 'selected' : ''}>AND</option>
+                                            <option value="||" ${operatorsArray[i] === '||' ? 'selected' : ''}>OR</option>
+                                        </select>
+                                    </td>` : ''}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="condition-buttons">
+                        <button class="btn btn-secondary" onclick="addCondition('&&')">
+                            <i class="fas fa-plus"></i> Add AND Condition
+                        </button>
+                        <button class="btn btn-secondary" onclick="addCondition('||')">
+                            <i class="fas fa-plus"></i> Add OR Condition
+                        </button>
+                    </div>
+
+                    <div class="action-section">
+                        <label for="edit-action"><strong>Action:</strong></label>
+                        <select id="edit-action" class="action-select" onchange="updatePreview()">
+                            ${actionsList.map(action => `
+                                <option value="${action}" ${action === currentAction ? 'selected' : ''}>${action}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+
+                    <div class="preview-box">
+                        <strong>Preview:</strong>
+                        <div id="preview" class="mt-2"></div>
+                    </div>
+                </div>
+            `;
+
+            Swal.fire({
+                title: index >= 0 ? 'Edit Rule' : 'New Rule',
+                html: conditionsTable,
+                width: '900px',
+                showCancelButton: true,
+                confirmButtonText: 'Save',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#dc3545',
+                didOpen: () => {
+                    updatePreview();
+                },
+                preConfirm: () => {
+                    const conditions = Array.from(document.querySelectorAll('#conditions-container tr')).map((row, i) => {
+                        const key = document.getElementById(`condition-key-${i}`).value;
+                        const op = document.getElementById(`condition-op-${i}`).value;
+                        const value = document.getElementById(`condition-value-${i}`).value;
+                        return `[${key}] ${op} "${value}"`;
+                    }).join(' && ');
+                    const action = `[${document.getElementById('edit-action').value}] == "true"`;
+                    
+                    if (conditions && action) {
+                        if (index >= 0) {
+                            rules[index].conditions = conditions;
+                            rules[index].action = action;
+                        } else {
+                            rules.push({
+                                line: rules.length + 1,
+                                conditions: conditions,
+                                action: action
+                            });
+                        }
+                        refreshTable();
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        function addCondition(operator) {
+            const container = document.getElementById('conditions-container');
+            const index = container.children.length;
+            
+            // Ajouter l'opérateur à la dernière ligne existante si ce n'est pas la première condition
+            if (index > 0) {
+                const lastRow = container.children[index - 1];
+                if (!lastRow.querySelector('select[id^="condition-join-"]')) {
+                    const operatorCell = document.createElement('td');
+                    operatorCell.innerHTML = `
+                        <select id="condition-join-${index - 1}" onchange="updatePreview()">
+                            <option value="&&" ${operator === '&&' ? 'selected' : ''}>AND</option>
+                            <option value="||" ${operator === '||' ? 'selected' : ''}>OR</option>
+                        </select>
+                    `;
+                    lastRow.appendChild(operatorCell);
+                }
+            }
+
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>
+                    <select id="condition-key-${index}" onchange="onKeyChange(${index}); updatePreview()">
+                        ${keysList.map(key => `<option value="${key}">${key}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <select id="condition-op-${index}" onchange="updatePreview()">
+                        ${['==', '!=', '<=', '>=', '<', '>'].map(op => 
+                            `<option value="${op}">${op}</option>`
+                        ).join('')}
+                    </select>
+                </td>
+                <td id="value-cell-${index}">
+                    ${createValueInput('', index)}
+                </td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="removeCondition(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            container.appendChild(newRow);
+            updatePreview();
+        }
+
+        /**
+         * Suppression d'une condition dans la fenêtre d'édition
+         * Version : 1.3.1
+         */
+        function removeCondition(index) {
+            const container = document.getElementById('conditions-container');
+            const rows = container.getElementsByTagName('tr');
+            if (rows[index]) {
+                rows[index].remove();
+                // Recalculer les index des conditions restantes
+                Array.from(rows).forEach((row, i) => {
+                    const key = row.querySelector('select[id^="condition-key-"]');
+                    const op = row.querySelector('select[id^="condition-op-"]');
+                    const value = row.querySelector('[id^="condition-value-"]');
+                    const join = row.querySelector('select[id^="condition-join-"]');
+                    
+                    if (key) key.id = `condition-key-${i}`;
+                    if (op) op.id = `condition-op-${i}`;
+                    if (value) value.id = `condition-value-${i}`;
+                    if (join) join.id = `condition-join-${i}`;
+                });
+                updatePreview();
+            }
+        }
+
+        function updatePreview() {
+            const container = document.getElementById('conditions-container');
+            const rows = container.querySelectorAll('tr');
+            let conditions = '';
+            
+            rows.forEach((row, i) => {
+                const key = document.getElementById(`condition-key-${i}`).value;
+                const op = document.getElementById(`condition-op-${i}`).value;
+                const value = document.getElementById(`condition-value-${i}`).value;
+                const joinOp = document.getElementById(`condition-join-${i}`);
+                
+                conditions += `[${key}] ${op} "${value}"`;
+                if (joinOp) {
+                    conditions += ` ${joinOp.value} `;
+                }
+            });
+
+            const action = `[${document.getElementById('edit-action').value}] == "true"`;
+            document.getElementById('preview').innerHTML = `<strong>Preview:</strong> ${conditions} # ${action}`;
+        }
+
+        function deleteRule(index) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    rules.splice(index, 1);
+                    refreshTable();
+                    Swal.fire(
+                        'Deleted!',
+                        'Your rule has been deleted.',
+                        'success'
+                    );
+                }
+            });
+        }
+
+        function filterRules() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const filteredRules = rules.filter(rule => rule.conditions.toLowerCase().includes(search));
+            const tbody = document.querySelector('#rulesTable tbody');
+            tbody.innerHTML = '';
+            filteredRules.forEach((rule, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rule.line}</td>
+                    <td>${rule.conditions}</td>
+                    <td>${rule.action}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="editRule(${index})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function validateRule(rule) {
+            // Vérifie si la règle a des conditions et une action
+            if (!rule.conditions || !rule.action) {
+                return false;
+            }
+
+            // Vérifie le format des conditions
+            const conditionParts = rule.conditions.split(/\s*(?:&&|\|\|)\s*/);
+            for (const condition of conditionParts) {
+                // Vérifie si chaque condition suit le format [Key] operator "Value"
+                const isValid = /^\[[\w\s]+\]\s*([=!<>]=?)\s*"[^"]*"$/.test(condition.trim());
+                if (!isValid) {
+                    return false;
+                }
+            }
+
+            // Vérifie le format de l'action
+            const actionFormat = /^\[(\w+)\]\s*==\s*"true"$/;
+            if (!actionFormat.test(rule.action)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        function exportFile() {
+            // Vérifie si il y a des règles à exporter
+            if (rules.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No rules to export',
+                    text: 'Please add some rules before exporting.'
+                });
+                return;
+            }
+
+            // Vérifie la validité de toutes les règles
+            const invalidRules = rules.filter((rule, index) => !validateRule(rule));
+            if (invalidRules.length > 0) {
+                const invalidIndexes = rules
+                    .map((rule, index) => !validateRule(rule) ? index + 1 : null)
+                    .filter(index => index !== null);
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid rules detected',
+                    text: `Please check rules at lines: ${invalidIndexes.join(', ')}`
+                });
+                return;
+            }
+
+            // Génère le contenu du fichier
+            const fileContent = [
+                '// Exported from Pickit Editor',
+                '// ' + new Date().toISOString(),
+                '',
+                ...rules.map(rule => `${rule.conditions} # ${rule.action}`),
+                '',
+                '//END'
+            ].join('\n');
+
+            // Crée et télécharge le fichier
+            const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+            const filename = 'exported_rules_' + new Date().toISOString().slice(0,10) + '.ipd';
+            
+            try {
+                saveAs(blob, filename);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export successful',
+                    text: `File saved as ${filename}`
+                });
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Export failed',
+                    text: error.message
+                });
+            }
+        }
+
+        // Ajout de la fonction de vérification des redondances
+        function checkRedundancies() {
+            const redundanciesContainer = document.getElementById('redundanciesContainer');
+            redundanciesContainer.innerHTML = '';
+            
+            // Grouper les règles par type
+            const rulesByType = {};
+            rules.forEach((rule, index) => {
+                const typeMatch = rule.conditions.match(/\[Type\]\s*==\s*"([^"]+)"/);
+                if (typeMatch) {
+                    const type = typeMatch[1];
+                    if (!rulesByType[type]) {
+                        rulesByType[type] = [];
+                    }
+                    rulesByType[type].push({ index, rule });
+                }
+            });
+
+            // Vérifier les redondances
+            let foundRedundancies = false;
+            for (const type in rulesByType) {
+                if (rulesByType[type].length > 1) {
+                    foundRedundancies = true;
+                    const warning = document.createElement('div');
+                    warning.className = 'redundancy-warning';
+                    warning.innerHTML = `
+                        <h4>Potential redundant rules for type "${type}":</h4>
+                        <ul>
+                            ${rulesByType[type].map(({ index, rule }) => `
+                                <li>Line ${rule.line}: ${rule.conditions} # ${rule.action}</li>
+                            `).join('')}
+                        </ul>
+                        <p>Suggestion: These rules could be simplified into a single rule:</p>
+                        <pre>[Type] == "${type}" # [StashItem] == "true"</pre>
+                    `;
+                    redundanciesContainer.appendChild(warning);
+                }
+            }
+
+            if (!foundRedundancies) {
+                redundanciesContainer.innerHTML = '<div class="alert alert-success">No redundant rules found.</div>';
+            }
+        }
+
+        // Ajouter un event listener pour charger les mods au démarrage
+        document.addEventListener('DOMContentLoaded', loadModsList);
+    </script>
+</body>
+</html>
