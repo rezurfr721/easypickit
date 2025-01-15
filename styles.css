@@ -94,9 +94,11 @@ th { background-color: #f2f2f2; }
     align-items: center;
     margin-bottom: 20px;
     padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+    background-color: #333;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 1px solid #444;
+    color: #e0e0e0;
 }
 
 .search-box {
@@ -105,8 +107,12 @@ th { background-color: #f2f2f2; }
     padding: 10px;
     border: 1px solid #444;
     border-radius: 5px;
-    background-color: #2b2b2b;
+    background-color: #333;
     color: #fff;
+}
+
+.search-box::placeholder {
+    color: #888;
 }
 
 .action-button {
@@ -272,10 +278,23 @@ h1 {
 
 .table-striped tbody tr:nth-of-type(odd) {
     background-color: #2b2b2b;
+    color: #e0e0e0;
 }
 
 .table-striped tbody tr:nth-of-type(even) {
     background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+.table thead th {
+    background-color: #333;
+    color: #fff;
+    border-bottom: 2px solid #444;
+}
+
+.table td, .table th {
+    border: 1px solid #444;
+    color: #e0e0e0;
 }
 
 .btn-primary {
@@ -285,6 +304,7 @@ h1 {
     padding: 5px 10px;
     cursor: pointer;
     border-radius: 5px;
+    border-color: #0056b3;
 }
 
 .btn-primary:hover {
@@ -298,6 +318,7 @@ h1 {
     padding: 5px 10px;
     cursor: pointer;
     border-radius: 5px;
+    border-color: #bd2130;
 }
 
 .btn-danger:hover {
@@ -357,4 +378,156 @@ h1 {
 .weapon-type-select:focus {
     outline: none;
     border-color: #af6025;
+}
+
+/* Correction du style du conteneur principal */
+.container {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+/* Amélioration de la lisibilité des cartes */
+.card {
+    background-color: #2b2b2b;
+    border: 1px solid #444;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    margin-bottom: 25px;
+}
+
+.card-header {
+    background-color: #333;
+    color: #fff;
+    border-bottom: 1px solid #444;
+    padding: 15px 20px;
+}
+
+.card-body {
+    color: #e0e0e0;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #e0e0e0;
+}
+
+/* Correction des styles pour les textes de modification */
+.conditions, .action {
+    color: #e0e0e0;
+}
+
+/* Amélioration du style des boutons d'action */
+.action-column {
+    white-space: nowrap;
+    text-align: center;
+    min-width: 120px;
+}
+
+.action-column .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    margin: 0 2px;
+}
+
+.action-column .btn i {
+    margin-right: 4px;
+}
+
+/* Amélioration de l'apparence du tableau */
+.table-dark {
+    background-color: #2b2b2b;
+    margin-bottom: 0;
+}
+
+.table-dark thead th {
+    background-color: #333;
+    border-bottom: 2px solid #444;
+    color: #fff;
+    font-weight: 600;
+    padding: 12px 8px;
+}
+
+.table-dark tbody td {
+    padding: 10px 8px;
+    vertical-align: middle;
+}
+
+/* Amélioration de la barre de recherche */
+.form-control {
+    background-color: #2b2b2b;
+    border: 1px solid #444;
+    color: #e0e0e0;
+    padding: 8px 12px;
+}
+
+.form-control:focus {
+    background-color: #333;
+    border-color: #666;
+    color: #fff;
+    box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.1);
+}
+
+/* Amélioration des hovers */
+.table-dark tbody tr:hover {
+    background-color: #383838;
+    transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s ease;
+}
+
+/* Styles pour Beta Create Pickit */
+.category-accordion {
+    margin-bottom: 1rem;
+}
+
+.category-header {
+    background-color: #333;
+    color: #fff;
+    padding: 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category-header:hover {
+    background-color: #444;
+}
+
+.category-content {
+    background-color: #2b2b2b;
+    padding: 15px;
+    border: 1px solid #444;
+    border-top: none;
+}
+
+.items-table {
+    width: 100%;
+}
+
+.items-table td {
+    padding: 8px;
+    border-bottom: 1px solid #444;
+}
+
+.item-checkbox {
+    margin-right: 10px;
+}
+
+.category-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+.collapsed .fa-chevron-down {
+    transform: rotate(-90deg);
 }
