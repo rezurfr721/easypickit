@@ -1,0 +1,20 @@
+{
+    "items": [
+        {
+            "id": 1,
+            "name": "Divine Orb",
+            "type": "Currency",
+            "latest_price": {
+                "nominal_price": 1
+            }
+        },
+        {
+            "id": 2,
+            "name": "Chaos Orb",
+            "type": "Currency",
+            "latest_price": {
+                "nominal_price": 0.0625
+            }
+        }
+    ]
+}

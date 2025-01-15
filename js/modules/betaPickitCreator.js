@@ -12,16 +12,12 @@ export class BetaPickitCreator {
     ];
 
     static async init() {
-        await this.loadAllData();
-    }
-
-    static async loadAllData(league = 'Standard', forceRefresh = false) {
         const accordion = document.getElementById('categoryAccordion');
-        accordion.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Chargement des données...</div>';
+        accordion.innerHTML = '<div class="text-center">Chargement des données...</div>';
 
         try {
             for (const category of this.categories) {
-                const items = await this.fetchCategoryData(category.endpoint, league);
+                const items = await this.loadLocalData(category.endpoint);
                 this.createCategoryPanel(accordion, category, items);
             }
         } catch (error) {
@@ -30,27 +26,35 @@ export class BetaPickitCreator {
         }
     }
 
-    static async fetchCategoryData(endpoint, league, page = 1, perPage = 25) {
+    static async loadLocalData(endpoint) {
         try {
-            const corsProxy = 'https://cors-anywhere.herokuapp.com/';
-            const url = `${corsProxy}https://poe2scout.com/api/items/${endpoint}?page=${page}&per_page=${perPage}&league=${league}`;
-            
-            const response = await fetch(url, {
-                headers: {
-                    'Origin': window.location.origin
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data;
+            // Charger les données depuis un fichier JSON local
+            const response = await fetch(`./data/${endpoint}.json`);
+            if (!response.ok) throw new Error('Données non disponibles');
+            return await response.json();
         } catch (error) {
-            console.error(`Error fetching ${endpoint} data:`, error);
-            return [];
+            console.error(`Erreur chargement ${endpoint}:`, error);
+            return this.getFallbackData(endpoint);
         }
+    }
+
+    static getFallbackData(endpoint) {
+        // Données de secours en cas d'échec du chargement
+        const fallbackData = {
+            currency: [
+                { id: 1, name: "Divine Orb" },
+                { id: 2, name: "Chaos Orb" },
+                // ... autres monnaies
+            ],
+            breachcatalyst: [
+                { id: 1, name: "Xoph's Breachstone" },
+                { id: 2, name: "Tul's Breachstone" },
+                // ... autres items breach
+            ],
+            // ... autres catégories
+        };
+
+        return fallbackData[endpoint] || [];
     }
 
     static createCategoryPanel(accordion, category, items) {
