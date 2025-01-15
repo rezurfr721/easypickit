@@ -1,14 +1,14 @@
 export class BetaPickitCreator {
     static categories = [
-        { id: 'currency', name: 'Currency' },
-        { id: 'ultimatum', name: 'Ultimatum' },
-        { id: 'breach', name: 'Breach' },
-        { id: 'delirium', name: 'Delirium' },
-        { id: 'essences', name: 'Essences' },
-        { id: 'fragments', name: 'Fragments' },
-        { id: 'expedition', name: 'Expedition' },
-        { id: 'ritual', name: 'Ritual' },
-        { id: 'runes', name: 'Runes' }
+        { id: 'currency', name: 'Currency', endpoint: 'currency' },
+        { id: 'ultimatum', name: 'Ultimatum', endpoint: 'ultimatum' },
+        { id: 'breach', name: 'Breach', endpoint: 'breachcatalyst' },
+        { id: 'delirium', name: 'Delirium', endpoint: 'delirium' },
+        { id: 'essences', name: 'Essences', endpoint: 'essences' },
+        { id: 'fragments', name: 'Fragments', endpoint: 'fragments' },
+        { id: 'expedition', name: 'Expedition', endpoint: 'expedition' },
+        { id: 'ritual', name: 'Ritual', endpoint: 'ritual' },
+        { id: 'runes', name: 'Runes', endpoint: 'runes' }
     ];
 
     static async init() {
@@ -22,7 +22,11 @@ export class BetaPickitCreator {
 
     static async fetchItems(category) {
         try {
-            const response = await fetch(`https://poe2scout.com/api/items/${category}?&league=Standard`, {
+            const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+            const categoryData = this.categories.find(c => c.id === category);
+            const apiUrl = `https://poe2scout.com/api/items/${categoryData.endpoint}?&league=Standard`;
+            
+            const response = await fetch(apiUrl, {
                 mode: 'no-cors',
                 headers: {
                     'Accept': 'application/json'
