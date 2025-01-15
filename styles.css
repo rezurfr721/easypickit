@@ -531,3 +531,38 @@ h1 {
 .collapsed .fa-chevron-down {
     transform: rotate(-90deg);
 }
+
+/* Styles pour la barre de progression */
+.loading-status {
+    padding: 15px;
+    background-color: #2b2b2b;
+    border-radius: 4px;
+    border: 1px solid #444;
+}
+
+.progress {
+    height: 20px;
+    background-color: #444;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-color: #af6025;
+    transition: width 0.3s ease;
+}
+
+#loadingText {
+    color: #e0e0e0;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+#loadingDetails {
+    color: #888;
+    font-size: 12px;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

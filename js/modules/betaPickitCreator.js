@@ -11,70 +11,135 @@ export class BetaPickitCreator {
         { id: 'ultimatum', name: 'Ultimatum', endpoint: 'ultimatum' }
     ];
 
+    static loadingStatus = new Map();
+    static loadedData = new Map();
+
     static async init() {
+        this.initProgressBar();
+        this.startBackgroundLoading();
+    }
+
+    static initProgressBar() {
         const accordion = document.getElementById('categoryAccordion');
-        accordion.innerHTML = '<div class="text-center">Chargement des données...</div>';
+        accordion.innerHTML = `
+            <div class="loading-status mb-3">
+                <div class="progress">
+                    <div id="loadingProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <div id="loadingText" class="text-center mt-2">Chargement des données en arrière-plan...</div>
+                <div id="loadingDetails" class="text-muted small"></div>
+            </div>
+        `;
+    }
 
-        try {
-            for (const category of this.categories) {
-                const items = await this.loadLocalData(category.endpoint);
-                this.createCategoryPanel(accordion, category, items);
-            }
-        } catch (error) {
-            console.error('Erreur lors du chargement des données:', error);
-            accordion.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des données</div>';
+    static async startBackgroundLoading() {
+        const totalCategories = this.categories.length;
+        let loadedCategories = 0;
+
+        for (const category of this.categories) {
+            this.loadingStatus.set(category.id, 'pending');
+            this.updateLoadingProgress(loadedCategories, totalCategories);
+
+            this.loadCategoryData(category).then(() => {
+                loadedCategories++;
+                this.updateLoadingProgress(loadedCategories, totalCategories);
+                this.loadingStatus.set(category.id, 'completed');
+                this.renderCategory(category);
+            }).catch(error => {
+                console.error(`Erreur chargement ${category.name}:`, error);
+                this.loadingStatus.set(category.id, 'error');
+                this.updateLoadingProgress(loadedCategories, totalCategories);
+            });
         }
     }
 
-    static async loadLocalData(endpoint) {
+    static async loadCategoryData(category) {
         try {
-            // Charger les données depuis un fichier JSON local
-            const response = await fetch(`./data/${endpoint}.json`);
-            if (!response.ok) throw new Error('Données non disponibles');
-            return await response.json();
+            const response = await fetch(`https://poe2scout.com/api/items/${category.endpoint}?page=1&per_page=25&league=Standard`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            this.loadedData.set(category.id, data);
+            return data;
         } catch (error) {
-            console.error(`Erreur chargement ${endpoint}:`, error);
-            return this.getFallbackData(endpoint);
+            console.error(`Error loading ${category.name}:`, error);
+            this.loadedData.set(category.id, []);
+            throw error;
         }
     }
 
-    static getFallbackData(endpoint) {
-        // Données de secours en cas d'échec du chargement
-        const fallbackData = {
-            currency: [
-                { id: 1, name: "Divine Orb" },
-                { id: 2, name: "Chaos Orb" },
-                // ... autres monnaies
-            ],
-            breachcatalyst: [
-                { id: 1, name: "Xoph's Breachstone" },
-                { id: 2, name: "Tul's Breachstone" },
-                // ... autres items breach
-            ],
-            // ... autres catégories
-        };
+    static updateLoadingProgress(loaded, total) {
+        const progress = Math.round((loaded / total) * 100);
+        const progressBar = document.getElementById('loadingProgress');
+        const loadingText = document.getElementById('loadingText');
+        const loadingDetails = document.getElementById('loadingDetails');
 
-        return fallbackData[endpoint] || [];
+        if (progressBar) progressBar.style.width = `${progress}%`;
+        if (loadingText) loadingText.textContent = `Chargement des données: ${progress}%`;
+        
+        const details = Array.from(this.loadingStatus.entries())
+            .map(([id, status]) => {
+                const category = this.categories.find(c => c.id === id);
+                const statusText = status === 'completed' ? '✓' : status === 'error' ? '✗' : '⌛';
+                return `${category.name}: ${statusText}`;
+            })
+            .join(' | ');
+        
+        if (loadingDetails) loadingDetails.textContent = details;
     }
 
-    static createCategoryPanel(accordion, category, items) {
-        const panel = document.createElement('div');
-        panel.className = 'category-accordion mb-3';
-        panel.innerHTML = `
+    static renderCategory(category) {
+        const items = this.loadedData.get(category.id) || [];
+        const accordion = document.getElementById('categoryAccordion');
+        
+        // Crée ou met à jour le panneau de catégorie
+        let categoryPanel = document.getElementById(`category-${category.id}`);
+        if (!categoryPanel) {
+            categoryPanel = document.createElement('div');
+            categoryPanel.id = `category-${category.id}`;
+            categoryPanel.className = 'category-accordion mb-3';
+            accordion.appendChild(categoryPanel);
+        }
+
+        categoryPanel.innerHTML = `
             <div class="category-header" onclick="toggleCategory('${category.id}')">
                 <div>
                     <i class="fas fa-box category-icon"></i>
-                    ${category.name}
+                    ${category.name} (${items.length} items)
+                    ${this.loadingStatus.get(category.id) === 'error' ? 
+                        '<span class="text-danger ml-2"><i class="fas fa-exclamation-triangle"></i></span>' : ''}
                 </div>
                 <i class="fas fa-chevron-down"></i>
             </div>
             <div id="content-${category.id}" class="category-content" style="display: none;">
-                <div class="items-container">
-                    ${items.map(item => this.createItemCheckbox(category, item)).join('')}
-                </div>
+                ${this.renderItems(items, category)}
             </div>
         `;
-        accordion.appendChild(panel);
+    }
+
+    static renderItems(items, category) {
+        if (!items.length) {
+            return '<p class="text-muted">Aucun item disponible</p>';
+        }
+
+        return `
+            <table class="items-table">
+                <tbody>
+                    ${items.map(item => `
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="item-checkbox" 
+                                       data-category="${category.id}" 
+                                       data-item="${item.name || ''}" 
+                                       id="item-${category.id}-${item.id || Math.random()}">
+                                <label for="item-${category.id}-${item.id || Math.random()}">
+                                    ${item.name || 'Unnamed Item'}
+                                </label>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
     }
 
     static createItemCheckbox(category, item) {
