@@ -166,3 +166,402 @@ h1 {
     visibility: visible;
     opacity: 1;
 }
+
+/* Styles pour la table des règles */
+.rules-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #1e1e1e;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+}
+
+.rules-table thead {
+    background-color: #2d2d2d;
+}
+
+.rules-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #c8c8c8;
+    border-bottom: 2px solid #444;
+}
+
+.rules-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #333;
+    color: #c8c8c8;
+}
+
+.rules-table tbody tr:hover {
+    background-color: #2d2d2d;
+}
+
+/* Style pour la colonne des conditions */
+.rules-table td:nth-child(2) {
+    font-family: 'Consolas', monospace;
+    color: #61afef;
+    max-width: 500px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Style pour la colonne des actions */
+.rules-table td:nth-child(3) {
+    font-family: 'Consolas', monospace;
+    color: #98c379;
+}
+
+/* Style pour les boutons d'action */
+.rules-table .btn {
+    padding: 4px 8px;
+    margin: 0 4px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
+
+.rules-table .btn-primary {
+    background-color: #4d4d4d;
+    color: #c8c8c8;
+}
+
+.rules-table .btn-danger {
+    background-color: #5a1d1d;
+    color: #c8c8c8;
+}
+
+.rules-table .btn:hover {
+    opacity: 0.8;
+    background-color: #666;
+}
+
+/* Style pour les lignes alternées */
+.rules-table tbody tr:nth-child(even) {
+    background-color: #252525;
+}
+
+/* Styles pour l'édition inline */
+.rules-table tr.editing {
+    background-color: #2d2d2d !important;
+}
+
+.rules-table .editable-content {
+    position: relative;
+    width: 100%;
+}
+
+.rules-table .edit-input {
+    width: 100%;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+}
+
+.rules-table .edit-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.rules-table .actions-cell {
+    white-space: nowrap;
+}
+
+.rules-table .btn-group {
+    display: flex;
+    gap: 4px;
+}
+
+.rules-table .btn-outline-secondary:hover,
+.rules-table .btn-outline-primary:hover,
+.rules-table .btn-outline-danger:hover,
+.rules-table .btn-outline-success:hover {
+    background-color: #444;
+}
+
+.d-none {
+    display: none !important;
+}
+
+.edit-rule-modal .swal2-popup {
+    padding: 2rem;
+}
+
+.edit-container .section-header {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 0.5rem;
+}
+
+.edit-container .form-select,
+.edit-container .form-control {
+    font-size: 0.875rem;
+}
+
+.edit-container .table {
+    margin-bottom: 0;
+}
+
+.edit-container .preview-section {
+    background: rgba(0,0,0,0.2);
+    padding: 1rem;
+    border-radius: 0.25rem;
+}
+
+.condition-row {
+    transition: background-color 0.2s;
+}
+
+.condition-row:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+/* Styles pour les boutons d'action */
+.rules-table .btn-group {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.rules-table .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    border: 1px solid;
+    background: transparent;
+    transition: all 0.2s;
+}
+
+.rules-table .btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.rules-table .btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.rules-table .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.rules-table .btn-outline-success {
+    border-color: #28a745;
+    color: #28a745;
+}
+
+.rules-table .btn:hover {
+    color: #fff;
+}
+
+.rules-table .btn-outline-secondary:hover {
+    background-color: #6c757d;
+}
+
+.rules-table .btn-outline-primary:hover {
+    background-color: #007bff;
+}
+
+.rules-table .btn-outline-danger:hover {
+    background-color: #dc3545;
+}
+
+.rules-table .btn-outline-success:hover {
+    background-color: #28a745;
+}
+
+.rules-table .btn i {
+    font-size: 14px;
+}
+
+/* Style pour les boutons dans la table */
+.rules-table .btn-group {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.rules-table .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    margin: 0;
+    border: 1px solid;
+    background: transparent;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.rules-table .btn i {
+    font-size: 14px;
+    margin-right: 4px;
+}
+
+.rules-table .btn-text {
+    margin-left: 4px;
+}
+
+/* Bouton Edit standard */
+.rules-table .btn-primary {
+    border-color: #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.rules-table .btn-primary:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Bouton Delete standard */
+.rules-table .btn-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.rules-table .btn-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* Boutons d'édition inline */
+.rules-table .btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.rules-table .btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.rules-table .btn-outline-success {
+    border-color: #28a745;
+    color: #28a745;
+}
+
+.rules-table .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.rules-table .btn-outline-primary:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.rules-table .btn-outline-success:hover {
+    background-color: #28a745;
+    color: #fff;
+}
+
+/* Styles pour l'édition inline */
+.suggestions-list {
+    position: absolute;
+    background: #2b2b2b;
+    border: 1px solid #444;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.suggestion-item:hover {
+    background-color: #444;
+}
+
+.suggestion-item.selected {
+    background-color: #0056b3;
+}
+
+.editing .edit-input {
+    background-color: #2b2b2b;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 6px 8px;
+    border-radius: 4px;
+    width: 100%;
+    font-family: 'Consolas', monospace;
+}
+
+.editing .edit-input:focus {
+    outline: none;
+    border-color: #0056b3;
+    box-shadow: 0 0 0 2px rgba(0,86,179,0.25);
+}
+
+/* Styles pour l'édition en ligne */
+.rule-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.rule-row:hover {
+    background-color: #2d2d2d !important;
+}
+
+.edit-input {
+    width: 100%;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.conditions-cell, .action-cell {
+    position: relative;
+    padding: 8px !important;
+}
+
+.conditions-cell:hover, .action-cell:hover {
+    background-color: #2d2d2d;
+}
+
+.rule-row {
+    cursor: pointer;
+    user-select: none;
+}
+
+.rule-row:hover td:not(.actions-cell) {
+    background-color: #2d2d2d;
+}
+
+.rule-row.editing td:not(.actions-cell) {
+    background-color: #333;
+}
+
+.editable-content {
+    position: relative;
+    width: 100%;
+    min-height: 24px;
+}

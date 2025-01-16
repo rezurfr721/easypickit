@@ -5,36 +5,57 @@
         let currentParsedData = null;
         let parsedData = null;
 
+        const DEFAULT_MODS = {
+            1: "Life",
+            2: "Mana",
+            3: "Energy Shield",
+            4: "Armor",
+            5: "Evasion",
+            6: "Block",
+            7: "Spell Block",
+            8: "Attack Speed",
+            9: "Cast Speed",
+            10: "Movement Speed"
+        };
+
+        const actionsList = [
+            "StashItem", "StashUnid", "Salvage", "SellItem"
+        ];
+
+        const typesList = [
+            // OneHandedWeapons
+            "Claws", "Daggers", "Wands", "OneHandSwords", "OneHandAxes", "OneHandMaces", "Sceptres", "Spears", "Flails",
+            // TwoHandedWeapons
+            "Bows", "Staves", "TwoHandSwords", "TwoHandAxes", "TwoHandMaces", "Quarterstaves", "Crossbows", "Traps", "FishingRods",
+            // OffHand
+            "Quivers", "Shields", "Foci",
+            // Armour
+            "Gloves", "Boots", "BodyArmours", "Helmets"
+        ];
+
+        const weaponTypes = [
+            "Claws", "Daggers", "Wands", "OneHandSwords", "OneHandAxes", "OneHandMaces", 
+            "Sceptres", "Spears", "Flails", "Bows", "Staves", "TwoHandSwords", 
+            "TwoHandAxes", "TwoHandMaces", "Quarterstaves", "Crossbows", "Traps", 
+            "FishingRods", "Quivers", "Shields", "Foci"
+        ];
+
         // Remplacer la fonction loadModsList() par:
-        function loadModsList() {
+        async function loadModsList() {
             try {
-                // Charger directement les mods depuis l'objet MODS_LIST
-                Object.entries(MODS_LIST).forEach(([index, name]) => {
-                    modsListCache[parseInt(index)] = name;
-                });
-
-                console.log('Mods list loaded successfully:', Object.keys(modsListCache).length, 'entries');
-            } catch (error) {
-                console.error('Error initializing mods list:', error);
+                const response = await fetch('./js/mods_list.json');
+                if (!response.ok) throw new Error('Failed to load mods list');
                 
-                // Initialisation avec des valeurs par défaut en cas d'erreur
-                const defaultMods = {
-                    1: "Life",
-                    2: "Mana",
-                    3: "Energy Shield",
-                    4: "Armor",
-                    5: "Evasion"
-                };
-
-                Object.entries(defaultMods).forEach(([index, name]) => {
+                const modsData = await response.json();
+                Object.entries(modsData).forEach(([index, name]) => {
                     modsListCache[parseInt(index)] = name;
                 });
-
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Mods List Initialization',
-                    text: 'Using default mods list. Some features may be limited.',
-                    footer: 'You can continue using the editor with basic functionality.'
+                console.log('Mods list loaded from JSON:', Object.keys(modsListCache).length, 'entries');
+            } catch (error) {
+                console.warn('Using default mods list due to error:', error);
+                // En cas d'erreur, utiliser la liste par défaut
+                Object.entries(DEFAULT_MODS).forEach(([index, name]) => {
+                    modsListCache[parseInt(index)] = name;
                 });
             }
         }
@@ -78,31 +99,25 @@
                 rules = [];
                 let lineNumber = 1;
                 let errors = [];
-                let inRulesSection = false;
 
                 for (const line of lines) {
                     const trimmedLine = line.trim();
                     
-                    // Ignorer les lignes vides
                     if (!trimmedLine) {
                         lineNumber++;
                         continue;
                     }
 
-                    // Ignorer les commentaires et les séparateurs
                     if (trimmedLine.startsWith('//') || trimmedLine.startsWith('////')) {
                         lineNumber++;
                         continue;
                     }
 
-                    // Vérifier si la ligne contient une règle valide
                     if (trimmedLine.includes('#')) {
                         try {
                             const [conditions, action] = trimmedLine.split('#').map(part => part.trim());
                             
-                            // Vérifier que la règle a le bon format
                             if (conditions && action) {
-                                // Vérifier le format [Type] == "Value" ou format similaire
                                 if (conditions.includes('[') && conditions.includes(']')) {
                                     rules.push({
                                         line: lineNumber,
@@ -129,12 +144,6 @@
                         title: 'Fichier chargé avec des avertissements',
                         html: `${rules.length} règles chargées<br>${errors.length} avertissements:<br>${errors.map(e => `- ${e}<br>`).join('')}`,
                         width: '600px'
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Chargement réussi',
-                        text: `${rules.length} règles chargées`
                     });
                 }
 
@@ -168,24 +177,6 @@
                 });
         }
 
-        // Ajout de la liste des actions
-        const actionsList = [
-            "StashItem", "StashUnid", "Salvage","SellItem"
-            // Ajoutez d'autres actions si nécessaire
-        ];
-
-        // Ajout des types depuis normal.ipd
-        const typesList = [
-            // OneHandedWeapons
-            "Claws", "Daggers", "Wands", "OneHandSwords", "OneHandAxes", "OneHandMaces", "Sceptres", "Spears", "Flails",
-            // TwoHandedWeapons
-            "Bows", "Staves", "TwoHandSwords", "TwoHandAxes", "TwoHandMaces", "Quarterstaves", "Crossbows", "Traps", "FishingRods",
-            // OffHand
-            "Quivers", "Shields", "Foci",
-            // Armour
-            "Gloves", "Boots", "BodyArmours", "Helmets"
-        ];
-
         // Variable pour tracker les modifications
 
         // Avertissement avant de fermer la page si modifications non sauvegardées
@@ -209,79 +200,304 @@
 
         function renderRules() {
     const tbody = document.querySelector('#rulesTable tbody');
+    if (!tbody) {
+        console.error('Table body not found');
+        return;
+    }
+
     tbody.innerHTML = '';
     
     rules.forEach((rule, index) => {
         const row = document.createElement('tr');
+        row.dataset.index = index;
+        row.classList.add('rule-row');
+        
         row.innerHTML = `
             <td>${rule.line}</td>
-            <td>${rule.conditions}</td>
-            <td>${rule.action}</td>
-            <td>
-                <button class="btn btn-primary btn-sm" onclick="editRule(${index})">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="deleteRule(${index})">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
+            <td class="conditions-cell" onclick="makeEditable(this)">
+                <span class="content">${rule.conditions}</span>
+                <input type="text" class="edit-input d-none" value="${rule.conditions}">
+            </td>
+            <td class="action-cell" onclick="makeEditable(this)">
+                <span class="content">${rule.action}</span>
+                <select class="edit-input d-none">
+                    ${actionsList.map(action => 
+                        `<option value="[${action}] == &quot;true&quot;" ${rule.action === `[${action}] == "true"` ? 'selected' : ''}>
+                            ${action}
+                        </option>`
+                    ).join('')}
+                </select>
+            </td>
+            <td class="actions-cell">
+                <div class="btn-group">
+                    <button class="btn btn-outline-secondary" onclick="editInline(${index})" title="Quick Edit">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="editRule(${index})" title="Advanced Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="deleteRule(${index})" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
             </td>
         `;
+
         tbody.appendChild(row);
+    });
+
+    // Ajouter les gestionnaires d'événements pour le clic sur les lignes
+    document.querySelectorAll('.rule-row').forEach(row => {
+        row.addEventListener('click', function(e) {
+            if (!e.target.closest('.actions-cell')) {
+                const index = parseInt(this.dataset.index);
+                editInline(index);
+            }
+        });
     });
 }
 
-        /**
-         * Chargement du fichier .ipd et affichage des règles dans le tableau
-         * Version : 1.3.0
-         */
-        function loadFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+function makeEditable(cell) {
+    const content = cell.querySelector('.content');
+    const input = cell.querySelector('.edit-input');
+    
+    if (content && input) {
+        content.classList.add('d-none');
+        input.classList.remove('d-none');
+        input.focus();
+        
+        input.onblur = () => saveEditable(cell);
+        input.onkeypress = (e) => {
+            if (e.key === 'Enter') {
+                saveEditable(cell);
+            }
+        };
+    }
+}
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const lines = e.target.result.split(/\r?\n/);
-                    rules = [];
-                    let lineNumber = 1;
-                    lines.forEach(line => {
-                        if (line.trim() && !line.startsWith("//")) {
-                            const parts = line.split("#");
-                            if (parts.length === 2) {
-                                rules.push({
-                                    line: lineNumber,
-                                    conditions: parts[0].trim(),
-                                    action: parts[1].trim()
-                                });
-                            } else {
-                                console.warn(`Invalid rule format at line ${lineNumber}: ${line}`);
-                            }
-                        }
-                        lineNumber++;
-                    });
-                    renderRules();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'File loaded successfully',
-                        text: `Loaded ${rules.length} rules`
-                    });
-                } catch (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error loading file',
-                        text: error.message
-                    });
-                }
-            };
-            reader.onerror = function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to read the file'
-                });
-            };
-            reader.readAsText(file);
+function saveEditable(cell) {
+    const content = cell.querySelector('.content');
+    const input = cell.querySelector('.edit-input');
+    const row = cell.closest('tr');
+    const index = parseInt(row.dataset.index);
+    
+    if (content && input && !isNaN(index)) {
+        const newValue = input.value.trim();
+        
+        if (cell.classList.contains('conditions-cell')) {
+            rules[index].conditions = newValue;
+        } else if (cell.classList.contains('action-cell')) {
+            rules[index].action = newValue;
         }
+        
+        content.textContent = newValue;
+        content.classList.remove('d-none');
+        input.classList.add('d-none');
+        
+        hasUnsavedChanges = true;
+    }
+}
+
+function editInline(index) {
+    const row = document.querySelector(`tr[data-index="${index}"]`);
+    if (row) {
+        const conditionsCell = row.querySelector('.conditions-cell');
+        const actionCell = row.querySelector('.action-cell');
+        
+        makeEditable(conditionsCell);
+        makeEditable(actionCell);
+    }
+}
+
+function enableInlineEdit(row) {
+    row.classList.add('editing');
+    row.querySelectorAll('.edit-input').forEach(input => input.classList.remove('d-none'));
+    row.querySelectorAll('.content').forEach(span => span.classList.add('d-none'));
+    row.querySelector('.edit-inline').classList.add('d-none');
+    row.querySelector('.edit-modal').classList.add('d-none');
+    row.querySelector('.delete-rule').classList.add('d-none');
+    row.querySelector('.save-inline').classList.remove('d-none');
+    row.querySelector('.cancel-inline').classList.remove('d-none');
+}
+
+function saveInlineEdit(row) {
+    const index = parseInt(row.dataset.index);
+    const conditions = row.querySelector('.conditions-cell .edit-input').value;
+    const action = row.querySelector('.action-cell .edit-input').value;
+
+    // Validation des valeurs
+    if (!validateInlineEdit(conditions, action)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Input',
+            text: 'Please check your conditions and action format'
+        });
+        return;
+    }
+
+    // Mise à jour des données
+    rules[index].conditions = conditions;
+    rules[index].action = action;
+    
+    // Mise à jour de l'affichage
+    row.querySelector('.conditions-cell .content').textContent = conditions;
+    row.querySelector('.action-cell .content').textContent = action;
+    
+    cancelInlineEdit(row);
+    hasUnsavedChanges = true;
+}
+
+function cancelInlineEdit(row) {
+    row.classList.remove('editing');
+    row.querySelectorAll('.edit-input').forEach(input => input.classList.add('d-none'));
+    row.querySelectorAll('.content').forEach(span => span.classList.remove('d-none'));
+    row.querySelector('.edit-inline').classList.remove('d-none');
+    row.querySelector('.edit-modal').classList.remove('d-none');
+    row.querySelector('.delete-rule').classList.remove('d-none');
+    row.querySelector('.save-inline').classList.add('d-none');
+    row.querySelector('.cancel-inline').classList.add('d-none');
+}
+
+function validateInlineEdit(conditions, action) {
+    // Validation des conditions
+    if (!conditions) return false;
+    
+    // Vérifier la structure basique [Key] Operator "Value"
+    const conditionParts = conditions.split(/\s*(?:&&|\|\|)\s*/);
+    for (const part of conditionParts) {
+        const isValidFormat = /^\[[\w\s]+\]\s*([=!<>]=?)\s*"[^"]*"$/.test(part.trim());
+        if (!isValidFormat) return false;
+        
+        // Vérifier si la clé existe dans nos listes connues
+        const keyMatch = part.match(/\[([\w\s]+)\]/);
+        if (keyMatch) {
+            const key = keyMatch[1];
+            const isValidKey = [...keysList, ...Object.values(modsListCache)].some(k => 
+                k.toLowerCase() === key.toLowerCase()
+            );
+            if (!isValidKey) return false;
+        }
+    }
+
+    // Validation de l'action
+    if (!action) return false;
+    const isValidAction = actionsList.some(validAction => 
+        action === `[${validAction}] == "true"`
+    );
+    
+    return isValidAction;
+}
+
+function enableInlineEdit(row) {
+    row.classList.add('editing');
+    
+    // Configuration de l'éditeur de conditions
+    const conditionsCell = row.querySelector('.conditions-cell');
+    const conditionsInput = conditionsCell.querySelector('.edit-input');
+    const conditionsContent = conditionsCell.querySelector('.content');
+    
+    // Configuration de l'éditeur d'action
+    const actionCell = row.querySelector('.action-cell');
+    const actionSelect = actionCell.querySelector('.edit-input');
+    const actionContent = actionCell.querySelector('.content');
+
+    // Afficher les éditeurs
+    conditionsInput.classList.remove('d-none');
+    actionSelect.classList.remove('d-none');
+    conditionsContent.classList.add('d-none');
+    actionContent.classList.add('d-none');
+
+    // Masquer/Afficher les boutons appropriés
+    row.querySelector('.edit-inline').classList.add('d-none');
+    row.querySelector('.edit-modal').classList.add('d-none');
+    row.querySelector('.delete-rule').classList.add('d-none');
+    row.querySelector('.save-inline').classList.remove('d-none');
+    row.querySelector('.cancel-inline').classList.remove('d-none');
+
+    // Ajouter l'auto-complétion pour les conditions
+    setupConditionsAutocomplete(conditionsInput);
+
+    // Focus sur l'input des conditions
+    conditionsInput.focus();
+}
+
+function setupConditionsAutocomplete(input) {
+    // Liste des suggestions courantes
+    const suggestions = [
+        ...keysList.map(key => `[${key}]`),
+        ...Object.values(modsListCache).map(mod => `[${mod}]`),
+        ' == ', ' != ', ' >= ', ' <= ', ' > ', ' < ',
+        ' && ', ' || ',
+        '"Normal"', '"Magic"', '"Rare"', '"Unique"'
+    ];
+
+    // Créer un élément pour la liste de suggestions
+    const suggestionsList = document.createElement('div');
+    suggestionsList.className = 'suggestions-list';
+    input.parentNode.appendChild(suggestionsList);
+
+    input.addEventListener('input', () => {
+        const cursorPos = input.selectionStart;
+        const inputValue = input.value;
+        const lastWord = getLastWord(inputValue, cursorPos);
+
+        if (lastWord) {
+            const matches = suggestions.filter(s => 
+                s.toLowerCase().startsWith(lastWord.toLowerCase())
+            );
+
+            if (matches.length > 0) {
+                showSuggestions(matches, input, suggestionsList, lastWord);
+            } else {
+                hideSuggestions(suggestionsList);
+            }
+        } else {
+            hideSuggestions(suggestionsList);
+        }
+    });
+}
+
+function saveInlineEdit(row) {
+    const index = parseInt(row.dataset.index);
+    const conditions = row.querySelector('.conditions-cell .edit-input').value;
+    const action = row.querySelector('.action-cell .edit-input').value;
+
+    if (!validateInlineEdit(conditions, action)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Input',
+            html: `Please check your input format:<br>
+                  Conditions: [Key] Operator "Value"<br>
+                  Multiple conditions can be joined with && or ||<br>
+                  Action must be one of the predefined actions`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' }
+        });
+        return;
+    }
+
+    // Mise à jour des données
+    rules[index].conditions = conditions;
+    rules[index].action = action;
+    
+    // Mise à jour de l'affichage
+    row.querySelector('.conditions-cell .content').textContent = conditions;
+    row.querySelector('.action-cell .content').textContent = action;
+    
+    cancelInlineEdit(row);
+    hasUnsavedChanges = true;
+
+    // Notification de succès
+    const toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000
+    });
+    toast.fire({
+        icon: 'success',
+        title: 'Rule updated successfully'
+    });
+}
 
         /**
          * Rafraîchit le tableau avec les règles chargées
@@ -296,9 +512,16 @@
                 row.insertCell().textContent = rule.conditions;
                 row.insertCell().textContent = rule.action;
                 const actionsCell = row.insertCell();
+                actionsCell.className = 'actions-cell';
                 actionsCell.innerHTML = `
-                    <button class="btn btn-primary btn-sm" onclick='editRule(${index})'><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick='deleteRule(${index})'><i class="fas fa-trash'></i></button>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="editRule(${index})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteRule(${index})" title="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                 `;
             });
         }
@@ -360,43 +583,9 @@ const operatorsList = [
         // Ajout d'un objet pour stocker les mods
         const modsDatabase = {};
 
-        // Remplacer la fonction loadModsList() par:
-        function loadModsList() {
-            try {
-                // Charger directement les mods depuis l'objet MODS_LIST
-                Object.entries(MODS_LIST).forEach(([index, name]) => {
-                    modsListCache[parseInt(index)] = name;
-                });
-
-                console.log('Mods list loaded successfully:', Object.keys(modsListCache).length, 'entries');
-            } catch (error) {
-                console.error('Error initializing mods list:', error);
-                
-                // Initialisation avec des valeurs par défaut en cas d'erreur
-                const defaultMods = {
-                    1: "Life",
-                    2: "Mana",
-                    3: "Energy Shield",
-                    4: "Armor",
-                    5: "Evasion"
-                };
-
-                Object.entries(defaultMods).forEach(([index, name]) => {
-                    modsListCache[parseInt(index)] = name;
-                });
-
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Mods List Initialization',
-                    text: 'Using default mods list. Some features may be limited.',
-                    footer: 'You can continue using the editor with basic functionality.'
-                });
-            }
-        }
-
         // Mise à jour de l'appel initial
-        document.addEventListener('DOMContentLoaded', () => {
-            loadModsList();  // Appel direct sans vérification de fichier
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadModsList();  // Appel direct sans vérification de fichier
         });
 
         // Mise à jour de la fonction getModName pour être plus robuste
@@ -406,43 +595,42 @@ const operatorsList = [
         }
 
         function createValueInput(key, index, value = '') {
-            // Vérifier si la clé est un nombre
+            const baseClass = 'form-control form-control-sm bg-dark text-light border-secondary';
+    
             if (!isNaN(key)) {
-                const modInfo = modsDatabase[key];
-                const tooltip = modInfo ? 
-                    `<div class="tooltip-text">${modInfo.name}: ${modInfo.description}</div>` : 
-                    '';
                 return `
-                    <div class="tooltip">
+                    <div class="input-group input-group-sm">
                         <input type="text" 
+                               class="${baseClass}"
                                id="condition-value-${index}" 
                                value="${value}" 
                                onchange="updatePreview()">
-                        ${tooltip}
+                        <span class="input-group-text bg-dark text-light border-secondary">
+                            <i class="fas fa-info-circle" title="${getModName(key)}"></i>
+                        </span>
                     </div>`;
             }
-
-            // Le reste du code existant pour Category, Rarity, etc.
+        
             if (key === 'Category') {
                 return `
-                    <select id="condition-value-${index}" onchange="updatePreview()">
+                    <select id="condition-value-${index}" 
+                            class="form-select form-select-sm bg-dark text-light border-secondary" 
+                            onchange="updatePreview()">
                         <option value="">Select Category</option>
                         ${categoryList.map(cat => 
-                            `<option value="${cat}" ${value === cat ? 'selected' : ''}>${cat}</option>
-                        `).join('')}
+                            `<option value="${cat}" ${value === cat ? 'selected' : ''}>${cat}</option>`
+                        ).join('')}
                     </select>`;
             }
-            if (key === 'Rarity') {
-                return `
-                    <select id="condition-value-${index}" onchange="updatePreview()">
-                        <option value="">Select Rarity</option>
-                        ${rarityList.map(rarity => 
-                            `<option value="${rarity}" ${value === rarity ? 'selected' : ''}>${rarity}</option>
-                        `).join('')}
-                    </select>`;
-            }
-            // Suppression de la condition pour Type, il utilisera maintenant le return par défaut
-            return `<input type="text" id="condition-value-${index}" value="${value}" onchange="updatePreview()">`;
+        
+            // ... reste des cas spéciaux
+        
+            return `
+                <input type="text" 
+                       class="${baseClass}"
+                       id="condition-value-${index}" 
+                       value="${value}" 
+                       onchange="updatePreview()">`;
         }
 
         function onKeyChange(index) {
@@ -503,139 +691,165 @@ const operatorsList = [
                 }];
             }
 
-            let conditionsTable = `
+            let editDialog = `
                 <div class="edit-container">
-                    <div class="condition-type-label">Pre-Identification Conditions:</div>
-                    <table class="edit-table">
-                        <thead>
-                            <tr>
-                                <th>Key</th>
-                                <th>Operator</th>
-                                <th>Value</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="conditions-container">
-                            ${preIdConditions.map((cond, i) => `
+                    <!-- En-tête -->
+                    <div class="section-header mb-3">
+                        <h5 class="mb-0">Pre-Identification Conditions</h5>
+                        <small class="text-muted">Define conditions to check before identifying the item</small>
+                    </div>
+        
+                    <!-- Table des conditions pré-identification -->
+                    <div class="conditions-table mb-4">
+                        <table class="table table-sm table-dark">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <select id="condition-key-${i}" onchange="onKeyChange(${i}); updatePreview()">
-                                            ${keysList.map(k => `
-                                                <option value="${k}" ${k === cond.key ? 'selected' : ''}>${k}</option>
-                                            `).join('')}
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select id="condition-op-${i}" onchange="updatePreview()">
-                                            ${['==', '!=', '<=', '>=', '<', '>'].map(op => `
-                                                <option value="${op}" ${op === cond.operator ? 'selected' : ''}>${op}</option>
-                                            `).join('')}
-                                        </select>
-                                    </td>
-                                    <td id="value-cell-${i}">
-                                        ${createValueInput(cond.key, i, cond.value)}
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-danger btn-sm" onclick="removeCondition(${i})">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                    ${i < preIdConditions.length - 1 ? `
-                                    <td>
-                                        <select id="condition-join-${i}" onchange="updatePreview()">
-                                            <option value="&&" ${operatorsArray[i] === '&&' ? 'selected' : ''}>AND</option>
-                                            <option value="||" ${operatorsArray[i] === '||' ? 'selected' : ''}>OR</option>
-                                        </select>
-                                    </td>` : ''}
+                                    <th style="width: 35%">Key</th>
+                                    <th style="width: 20%">Operator</th>
+                                    <th style="width: 35%">Value</th>
+                                    <th style="width: 10%">Actions</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-
-                    <div class="condition-buttons">
-                        <button class="btn btn-secondary" onclick="addCondition('&&')">
-                            <i class="fas fa-plus"></i> Add AND Condition
-                        </button>
-                        <button class="btn btn-secondary" onclick="addCondition('||')">
-                            <i class="fas fa-plus"></i> Add OR Condition
-                        </button>
-                    </div>
-
-                    <div class="post-id-section">
-                        <div class="post-id-header">Post-Identification Conditions:</div>
-                        <div class="post-id-conditions">
-                            <table class="edit-table" id="post-id-conditions-table">
-                                <thead>
-                                    <tr>
-                                        <th>Mod</th>
-                                        <th>Operator</th>
-                                        <th>Value</th>
-                                        <th>Action</th>
+                            </thead>
+                            <tbody id="conditions-container">
+                                ${preIdConditions.map((cond, i) => `
+                                    <tr class="condition-row">
+                                        <td>
+                                            <select class="form-select form-select-sm bg-dark text-light border-secondary" 
+                                                    id="condition-key-${i}" 
+                                                    onchange="onKeyChange(${i}); updatePreview()">
+                                                ${keysList.map(k => `
+                                                    <option value="${k}" ${k === cond.key ? 'selected' : ''}>${k}</option>
+                                                `).join('')}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm bg-dark text-light border-secondary" 
+                                                    id="condition-op-${i}" 
+                                                    onchange="updatePreview()">
+                                                ${operatorsList.map(op => `
+                                                    <option value="${op.value}" ${op.value === cond.operator ? 'selected' : ''}>${op.label}</option>
+                                                `).join('')}
+                                            </select>
+                                        </td>
+                                        <td id="value-cell-${i}">
+                                            ${createValueInput(cond.key, i, cond.value)}
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-danger btn-sm" onclick="removeCondition(${i})">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody id="post-id-conditions-container">
-                                    ${postIdConditions.map((cond, i) => `
-                                        <tr>
-                                            <td>
-                                                <input type="text" 
-                                                    id="post-id-key-${i}" 
-                                                    value="${cond.key}"
-                                                    placeholder="base_maximum_life"
-                                                    onchange="updatePreview()">
-                                            </td>
-                                            <td>
-                                                <select id="post-id-op-${i}" onchange="updatePreview()">
-                                                    ${['>=', '<=', '==', '>', '<'].map(op => 
-                                                        `<option value="${op}" ${op === cond.operator ? 'selected' : ''}>${op}</option>`
-                                                    ).join('')}
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <input type="text" 
-                                                    id="post-id-value-${i}" 
-                                                    value="${cond.value}"
-                                                    onchange="updatePreview()">
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-danger btn-sm" onclick="removePostIdCondition(${i})">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                            <button class="btn btn-secondary mt-2" onclick="addPostIdCondition()">
-                                <i class="fas fa-plus"></i> Add Post-ID Condition
-                            </button>
-                        </div>
+                                `).join('')}
+                            </tbody>
+                        </table>
                     </div>
-
-                    <div class="action-section">
-                        <label for="edit-action"><strong>Action:</strong></label>
-                        <select id="edit-action" class="action-select" onchange="updatePreview()">
+        
+                    <!-- Boutons d'ajout de conditions -->
+                    <div class="button-group mb-4">
+                        <button class="btn btn-outline-primary btn-sm me-2" onclick="addCondition('&&')">
+                            <i class="fas fa-plus me-1"></i> Add AND Condition
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="addCondition('||')">
+                            <i class="fas fa-plus me-1"></i> Add OR Condition
+                        </button>
+                    </div>
+        
+                    <!-- Section Post-Identification -->
+                    <div class="section-header mb-3">
+                        <h5 class="mb-0">Post-Identification Conditions</h5>
+                        <small class="text-muted">Define conditions to check after identifying the item</small>
+                    </div>
+        
+                    <!-- Table des conditions post-identification -->
+                    <div class="conditions-table mb-4">
+                        <table class="table table-sm table-dark">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35%">Mod</th>
+                                    <th style="width: 20%">Operator</th>
+                                    <th style="width: 35%">Value</th>
+                                    <th style="width: 10%">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="post-id-conditions-container">
+                                ${postIdConditions.map((cond, i) => `
+                                    <tr>
+                                        <td>
+                                            <input type="text" 
+                                                id="post-id-key-${i}" 
+                                                value="${cond.key}"
+                                                placeholder="base_maximum_life"
+                                                onchange="updatePreview()">
+                                        </td>
+                                        <td>
+                                            <select id="post-id-op-${i}" onchange="updatePreview()">
+                                                ${['>=', '<=', '==', '>', '<'].map(op => 
+                                                    `<option value="${op}" ${op === cond.operator ? 'selected' : ''}>${op}</option>`
+                                                ).join('')}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" 
+                                                id="post-id-value-${i}" 
+                                                value="${cond.value}"
+                                                onchange="updatePreview()">
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-danger btn-sm" onclick="removePostIdCondition(${i})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <button class="btn btn-outline-primary btn-sm mt-2" onclick="addPostIdCondition()">
+                            <i class="fas fa-plus me-1"></i> Add Post-ID Condition
+                        </button>
+                    </div>
+        
+                    <!-- Section Action -->
+                    <div class="section-header mb-3">
+                        <h5 class="mb-0">Action</h5>
+                        <small class="text-muted">Select the action to perform when conditions are met</small>
+                    </div>
+                    <div class="action-section mb-4">
+                        <select id="edit-action" class="form-select bg-dark text-light border-secondary" onchange="updatePreview()">
                             ${actionsList.map(action => `
                                 <option value="${action}" ${action === currentAction ? 'selected' : ''}>${action}</option>
                             `).join('')}
                         </select>
                     </div>
-
-                    <div class="preview-box">
-                        <strong>Preview:</strong>
-                        <div id="preview" class="mt-2"></div>
+        
+                    <!-- Preview -->
+                    <div class="preview-section">
+                        <h5 class="mb-2">Rule Preview</h5>
+                        <div id="preview" class="p-2 bg-dark border border-secondary rounded"></div>
                     </div>
                 </div>
             `;
-
+        
+            // Style personnalisé pour la popup
+            const customClass = {
+                container: 'edit-rule-modal',
+                popup: 'bg-dark text-light',
+                header: 'border-bottom border-secondary',
+                content: 'p-0',
+                confirmButton: 'btn btn-success',
+                cancelButton: 'btn btn-outline-danger'
+            };
+        
             Swal.fire({
                 title: index >= 0 ? 'Edit Rule' : 'New Rule',
-                html: conditionsTable,
+                html: editDialog,
                 width: '900px',
+                background: '#2b2b2b',
+                color: '#ffffff',
+                customClass: customClass,
                 showCancelButton: true,
                 confirmButtonText: 'Save',
                 cancelButtonText: 'Cancel',
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#dc3545',
                 didOpen: () => {
                     updatePreview();
                 },
@@ -879,10 +1093,10 @@ const operatorsList = [
                     <td>${rule.action}</td>
                     <td>
                         <button class="btn btn-primary btn-sm" onclick="editRule(${index})">
-                            <i class="fas fa-edit"></i> Edit
+                            Edit
                         </button>
                         <button class="btn btn-danger btn-sm" onclick="deleteRule(${index})">
-                            <i class="fas fa-trash"></i> Delete
+                            Delete
                         </button>
                     </td>
                 `;
@@ -1057,52 +1271,29 @@ const operatorsList = [
 
         // Modify showPasteDialog to include live parsing
         function showPasteDialog() {
-            Swal.fire({
-                title: 'Paste Rule Text',
-                html: `
-                    <div class="paste-container" style="margin: 20px 0;">
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label for="rule-name" style="display: block; margin-bottom: 5px;">Rule Name:</label>
-                            <input type="text" 
-                                id="rule-name" 
-                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
-                                placeholder="Enter a short name for this rule">
-                        </div>
-                        <p class="hint" style="margin-bottom: 10px; font-size: 0.9em; color: #666;">
-                            Paste a rule text with debug data ([dump] -> lines)
-                        </p>
-                        <textarea id="rule-text" 
-                            style="width: 100%; height: 150px; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;"
-                            placeholder="Paste your rule text here..."
-                            oninput="updateParsedData(this.value)"></textarea>
-                        <div id="parsed-data-container"></div>
-                    </div>
-                `,
-                // ... rest of the existing showPasteDialog code ...
-            });
-        }
-
-        // Function to update parsed data display
-        function updateParsedData(text) {
-            const container = document.getElementById('parsed-data-container');
-            if (text.includes('[dump]')) {
-                const parsedData = parseDebugData(text);
-                container.innerHTML = formatParsedDataAsHtml(parsedData);
+            // Charger dynamiquement le fichier mods_list.js si nécessaire
+            if (typeof MODS_LIST === 'undefined') {
+                const script = document.createElement('script');
+                script.src = './js/mods_list.js';
+                script.onload = () => {
+                    // Une fois le fichier chargé, initialiser modsListCache
+                    loadModsList();
+                    // Puis afficher le dialogue
+                    showPasteDialogUI();
+                };
+                script.onerror = () => {
+                    console.warn('Could not load mods list, using default mods');
+                    loadModsList(); // Utilisera les mods par défaut
+                    showPasteDialogUI();
+                };
+                document.head.appendChild(script);
             } else {
-                container.innerHTML = '';
+                // Si déjà chargé, afficher directement le dialogue
+                showPasteDialogUI();
             }
         }
 
-        
-
-        function getModName(index) {
-            return modsListCache[index] || 'Unknown Mod';
-        }
-
-        // Load mods list on page load
-        document.addEventListener('DOMContentLoaded', loadModsList);
-
-        function showPasteDialog() {
+        function showPasteDialogUI() {
             Swal.fire({
                 title: 'Paste Item Data',
                 html: `
@@ -1271,14 +1462,6 @@ const operatorsList = [
                 }
             }
         }
-
-        // Ajouter cette constante en haut du fichier avec les autres constantes
-const weaponTypes = [
-    "Claws", "Daggers", "Wands", "OneHandSwords", "OneHandAxes", "OneHandMaces", 
-    "Sceptres", "Spears", "Flails", "Bows", "Staves", "TwoHandSwords", 
-    "TwoHandAxes", "TwoHandMaces", "Quarterstaves", "Crossbows", "Traps", 
-    "FishingRods", "Quivers", "Shields", "Foci"
-];
 
         function parseRawText(text) {
             if (!text) return {
@@ -1592,8 +1775,6 @@ const weaponTypes = [
             container.innerHTML = formatParsedDataPreview(parsedData);
         }
 
-        document.addEventListener('DOMContentLoaded', loadModsList);
-
         function generateRulesFromParsedData(data) {
     if (!data) return [];
     
@@ -1696,21 +1877,275 @@ function renderRules() {
     
     rules.forEach((rule, index) => {
         const row = document.createElement('tr');
+        row.dataset.index = index;
+        row.className = 'rule-row';
+        
+        // Colonne numéro de ligne
         row.innerHTML = `
             <td>${rule.line}</td>
-            <td>${rule.conditions}</td>
-            <td>${rule.action}</td>
-            <td>
-                <button class="btn btn-primary btn-sm" onclick="editRule(${index})">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="deleteRule(${index})">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
+            <td class="conditions-cell">
+                <div class="editable-content">
+                    <span class="content">${rule.conditions}</span>
+                    <input type="text" class="edit-input d-none form-control" value="${rule.conditions}">
+                </div>
+            </td>
+            <td class="action-cell">
+                <div class="editable-content">
+                    <span class="content">${rule.action}</span>
+                    <select class="edit-input d-none form-control">
+                        ${actionsList.map(action => 
+                            `<option value="[${action}] == &quot;true&quot;" ${rule.action === `[${action}] == "true"` ? 'selected' : ''}>
+                                ${action}
+                            </option>`
+                        ).join('')}
+                    </select>
+                </div>
+            </td>
+            <td class="actions-cell">
+                <div class="btn-group">
+                    <button class="btn btn-outline-secondary edit-inline" title="Quick Edit">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn btn-outline-primary edit-modal" title="Advanced Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger delete-rule" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <button class="btn btn-outline-success save-inline d-none" title="Save">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn btn-outline-danger cancel-inline d-none" title="Cancel">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </td>
         `;
+
+        // Ajout des gestionnaires d'événements
+        const editInlineBtn = row.querySelector('.edit-inline');
+        const editModalBtn = row.querySelector('.edit-modal');
+        const deleteBtn = row.querySelector('.delete-rule');
+        const saveBtn = row.querySelector('.save-inline');
+        const cancelBtn = row.querySelector('.cancel-inline');
+        const editInputs = row.querySelectorAll('.edit-input');
+        const contents = row.querySelectorAll('.content');
+
+        editInlineBtn.addEventListener('click', () => enableInlineEdit(row));
+        editModalBtn.addEventListener('click', () => editRule(index));
+        deleteBtn.addEventListener('click', () => deleteRule(index));
+        saveBtn.addEventListener('click', () => saveInlineEdit(row));
+        cancelBtn.addEventListener('click', () => cancelInlineEdit(row));
+
         tbody.appendChild(row);
     });
 }
 
 // ...existing code...
+
+function createTableRow(rule, index) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${rule.condition}</td>
+        <td>${rule.action}</td>
+        <td>
+            <button class="btn btn-primary" onclick="editRule(${index})">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-danger" onclick="deleteRule(${index})">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </td>
+    `;
+    return tr;
+}
+// ...existing code...
+
+function refreshTable() {
+    const tbody = document.querySelector("#rulesTable tbody");
+    tbody.innerHTML = "";
+    rules.forEach((rule, index) => {
+        const row = tbody.insertRow();
+        row.insertCell().textContent = rule.line;
+        row.insertCell().textContent = rule.conditions;
+        row.insertCell().textContent = rule.action;
+        const actionsCell = row.insertCell();
+        actionsCell.className = 'actions-cell';
+        actionsCell.innerHTML = `
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="editRule(${index})" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger" onclick="deleteRule(${index})" title="Delete">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        `;
+    });
+}
+
+// ...existing code...
+
+// Ajouter cet écouteur d'événements quand le DOM est chargé
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestionnaire pour le chargement de fichier
+    document.getElementById('fileInput').addEventListener('change', loadFile);
+    
+    // Charger la liste des mods (déjà existant)
+    loadModsList();
+});
+
+// Corriger la fonction loadFile
+async function loadFile(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        Swal.fire({ 
+            icon: 'error', 
+            title: 'Erreur',
+            text: 'Aucun fichier sélectionné' 
+        });
+        return;
+    }
+
+    try {
+        console.log('Chargement du fichier:', file.name);
+        const text = await file.text();
+        const lines = text.split(/\r?\n/);
+        rules = [];
+        let lineNumber = 1;
+        let errors = [];
+
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            
+            if (!trimmedLine || trimmedLine.startsWith('//')) {
+                lineNumber++;
+                continue;
+            }
+
+            if (trimmedLine.includes('#')) {
+                try {
+                    const [conditions, action] = trimmedLine.split('#').map(part => part.trim());
+                    
+                    if (conditions && action) {
+                        if (conditions.includes('[') && conditions.includes(']')) {
+                            rules.push({
+                                line: lineNumber,
+                                conditions,
+                                action
+                            });
+                        } else {
+                            errors.push(`Ligne ${lineNumber}: Format de condition invalide - ${conditions}`);
+                        }
+                    }
+                } catch (e) {
+                    errors.push(`Ligne ${lineNumber}: Erreur de parsing - ${e.message}`);
+                }
+            }
+            lineNumber++;
+        }
+
+        if (errors.length > 0) {
+            console.warn('Avertissements lors du chargement:', errors);
+            Swal.fire({
+                icon: 'warning',
+                title: 'Fichier chargé avec des avertissements',
+                html: `${rules.length} règles chargées<br>${errors.length} avertissements:<br>${errors.join('<br>')}`,
+                width: '600px'
+            });
+        }
+
+        refreshTable();
+        
+    } catch (error) {
+        console.error('Erreur lors du chargement:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erreur de chargement',
+            text: error.message
+        });
+    }
+}
+
+// ...existing code...
+
+// Ajouter ce gestionnaire d'événements après les déclarations de variables globales
+document.addEventListener('DOMContentLoaded', function() {
+    // Délégation d'événements pour la table
+    document.querySelector('#rulesTable').addEventListener('click', function(e) {
+        const row = e.target.closest('tr');
+        if (!row) return;
+        
+        // Si on clique sur un bouton, ne pas déclencher l'édition en ligne
+        if (e.target.closest('.btn-group')) return;
+        
+        const index = row.dataset.index;
+        if (index !== undefined) {
+            // Si on clique sur une cellule éditable, activer l'édition pour cette cellule
+            if (e.target.closest('.conditions-cell, .action-cell')) {
+                const cell = e.target.closest('.conditions-cell, .action-cell');
+                makeEditable(cell);
+            }
+            // Sinon, activer l'édition pour toute la ligne
+            else {
+                editInline(parseInt(index));
+            }
+        }
+    });
+
+    // ...existing code...
+});
+
+function renderRules() {
+    const tbody = document.querySelector('#rulesTable tbody');
+    if (!tbody) {
+        console.error('Table body not found');
+        return;
+    }
+
+    tbody.innerHTML = '';
+    
+    rules.forEach((rule, index) => {
+        const row = document.createElement('tr');
+        row.dataset.index = index;
+        row.className = 'rule-row';
+        
+        row.innerHTML = `
+            <td>${rule.line}</td>
+            <td class="conditions-cell">
+                <div class="editable-content">
+                    <span class="content">${rule.conditions}</span>
+                    <input type="text" class="edit-input d-none" value="${rule.conditions}">
+                </div>
+            </td>
+            <td class="action-cell">
+                <div class="editable-content">
+                    <span class="content">${rule.action}</span>
+                    <select class="edit-input d-none">
+                        ${actionsList.map(action => 
+                            `<option value="[${action}] == &quot;true&quot;" ${rule.action === `[${action}] == "true"` ? 'selected' : ''}>
+                                ${action}
+                            </option>`
+                        ).join('')}
+                    </select>
+                </div>
+            </td>
+            <td class="actions-cell">
+                <div class="btn-group">
+                    <button class="btn btn-outline-secondary edit-inline" title="Quick Edit">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn btn-outline-primary edit-modal" title="Advanced Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger delete-rule" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+}

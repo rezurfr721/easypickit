@@ -14,15 +14,18 @@
     <!-- FileSaver.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-    <!-- Charger le fichier mods_list.js -->
-    <script src="./mods_list.js"></script>
-
     <!-- Notre CSS -->
     <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
     <h1>Pickit Editor for EB2</h1>
     <div class="toolbar-container">
+        <div class="file-input-wrapper">
+            <button class="file-input-button">
+                <i class="fas fa-upload"></i> Load IPD File
+            </button>
+            <input type="file" id="fileInput" accept=".ipd">
+        </div>
         <button class="action-button btn-add" onclick="addRule()">
             <i class="fas fa-plus"></i> Add Rule
         </button>
@@ -32,12 +35,6 @@
         <button class="action-button btn-export" onclick="exportFile()">
             <i class="fas fa-download"></i> Export
         </button>
-        <div class="file-input-wrapper">
-            <button class="file-input-button">
-                <i class="fas fa-upload"></i> Load IPD File
-            </button>
-            <input type="file" id="fileInput" accept=".ipd" onchange="loadFile(event)">
-        </div>
         <input type="text" 
                id="search" 
                placeholder="Search rules..." 
@@ -64,6 +61,6 @@
     </table>
 
     <!-- Charger le fichier script.js -->
-    <script src="./script.js"></script>
+    <script src="./js/script.js"></script>
 </body>
 </html>
